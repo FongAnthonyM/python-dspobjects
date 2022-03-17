@@ -1,16 +1,13 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """ __init__.py
-Objects for digital signal data processing.
+Test suite for the baseobjects package.
 """
 # Package Header #
-from .header import *
+from src.dspobjects.header import *
 
 # Header #
 __author__ = __author__
 __credits__ = __credits__
 __maintainer__ = __maintainer__
 __email__ = __email__
-
-
-# Imports #
-# Local Packages #
-from .resample import Resample
