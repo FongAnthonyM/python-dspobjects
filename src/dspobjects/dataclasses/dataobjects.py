@@ -54,6 +54,14 @@ class FoundTimeRange(NamedTuple):
 
 
 class FoundData(NamedTuple):
+    """A named tuple for returning a found data."""
+    data: np.ndarray | None
+    index: int | None
+    datetime: datetime.datetime | None
+    timestamp: float | None
+
+
+class FoundDataRange(NamedTuple):
     """A named tuple for returning a found data range."""
     data: np.ndarray | None
     axis: np.ndarray | None
@@ -63,4 +71,4 @@ class FoundData(NamedTuple):
     end_index: int | None
 
 
-__all__ = ["IndexValue", "IndexDateTime", "FoundRange", "FoundTimeRange", "FoundData"]
+__all__ = ["IndexValue", "IndexDateTime", "FoundRange", "FoundTimeRange", "FoundData", "FoundDataRange"]
