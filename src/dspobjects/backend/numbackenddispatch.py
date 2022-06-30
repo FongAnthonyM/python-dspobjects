@@ -19,6 +19,7 @@ from typing import Any
 
 # Third-Party Packages #
 from baseobjects import BaseDecorator
+from baseobjects.dataclasses import Parameters
 from baseobjects.typing import AnyCallable
 import numpy as np
 try:
@@ -185,7 +186,7 @@ class NumBackendDispatch(BaseDecorator):
         return self.__func__(*args, **kwargs)
 
     # Casting
-    def cast_input_to_np(self, *args: Any, **kwargs: Any) -> Any:
+    def cast_input_to_np(self, *args: Any, **kwargs: Any) -> Parameters:
         """Casts the inputs into the correct numpy object.
 
         Args:
@@ -205,9 +206,9 @@ class NumBackendDispatch(BaseDecorator):
             if isinstance(value, cp_array_types):
                 new_kwargs[name] = cp.asnumpy(value)
 
-        return new_args, new_kwargs
+        return Parameters(new_args, new_kwargs)
 
-    def cast_input_to_cp(self, *args: Any, **kwargs: Any) -> Any:
+    def cast_input_to_cp(self, *args: Any, **kwargs: Any) -> Parameters:
         """Casts the inputs into the correct cupy object.
 
         Args:
@@ -227,7 +228,7 @@ class NumBackendDispatch(BaseDecorator):
             if isinstance(value, np.ndarray):
                 new_kwargs[name] = cp.asarray(value)
 
-        return new_args, new_kwargs
+        return Parameters(new_args, new_kwargs)
 
     # Num Backend Dispatching
     def set_dispatch_method(self, method: AnyCallable | str) -> None:
