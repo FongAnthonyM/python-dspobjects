@@ -2,8 +2,6 @@
 
 """
 # Package Header #
-import cupy
-
 from ..header import *
 
 # Header #
@@ -14,13 +12,14 @@ __email__ = __email__
 
 # Imports #
 # Standard Libraries #
+from collections.abc import Callable
 import pathlib
 from types import ModuleType
 from typing import Any
 
 # Third-Party Packages #
 from baseobjects import BaseDecorator
-from baseobjects.types_ import AnyCallable
+from baseobjects.typing import AnyCallable
 import numpy as np
 try:
     import tomllib
@@ -64,16 +63,16 @@ class NumBackendDispatch(BaseDecorator):
     # Class Methods #
     @classmethod
     def load_config(cls) -> None:
-
-        with cls.config_path.open(mode="rb") as file:
-            config_dict = tomllib.load(file)
+        if cls.config_path.exists():
+            with cls.config_path.open(mode="rb") as file:
+                config_dict = tomllib.load(file)
 
     # Magic Methods #
     # Construction/Destruction
     def __init__(
         self,
-        kwarg: AnyCallable | str,
-        dispatch_method: AnyCallable | str | None = None,
+        kwarg: AnyCallable | str = "xp",
+        dispatch_method: Callable[..., ModuleType] | str | None = None,
         call_method: AnyCallable | str | None = None,
         func: AnyCallable | None = None,
         init: bool | None = True,
@@ -82,17 +81,16 @@ class NumBackendDispatch(BaseDecorator):
         super().__init__(init=False)
 
         # Override Attributes #
-        self._default_call_method = self.dispatch_only_call
+        self._default_call_method: AnyCallable = self.dispatch_cast_call
 
         # New Attributes #
-        self.default_backend = np
-        self.instance_backend = np
+        self.default_backend: ModuleType = np
+        self.instance_backend: ModuleType = np
 
         self.kwarg_name: str = "xp"
 
-        self._default_dispatch_method: AnyCallable = self.no_dispatch
-        self._dispatch_method: AnyCallable = self.no_dispatch
-        self._previous_dispatch_method: AnyCallable = self.no_dispatch
+        self._default_dispatch_method: Callable[..., ModuleType] = self.no_dispatch
+        self._dispatch_method: Callable[..., ModuleType] = self.no_dispatch
 
         # Object Construction #
         if init:
@@ -118,7 +116,7 @@ class NumBackendDispatch(BaseDecorator):
     def construct(
         self,
         kwarg: str | None = None,
-        dispatch_method: AnyCallable | str | None = None,
+        dispatch_method: Callable[..., ModuleType] | str | None = None,
         call_method: AnyCallable | str | None = None,
         func: AnyCallable | None = None,
         **kwargs: Any,
@@ -312,3 +310,21 @@ class NumBackendDispatch(BaseDecorator):
 
 if cp is None:
     NumBackendDispatch
+
+
+# Functions #
+def num_backend_dispatch(
+    kwarg: AnyCallable | str = "xp",
+    dispatch_method: AnyCallable | str | None = None,
+    call_method: AnyCallable | str | None = None,
+    func: AnyCallable | None = None,
+) -> NumBackendDispatch:
+    """A factory to be used as a decorator
+
+    Args:
+
+
+    Returns:
+        The result or the caching_method.
+    """
+    return NumBackendDispatch(kwarg=kwarg, dispatch_method=dispatch_method, call_method=call_method, func=func)

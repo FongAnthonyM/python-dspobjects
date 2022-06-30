@@ -1,4 +1,7 @@
 
+type = "num_backend_dispatch"
+version = "0.1.0"
+
 [Global]
 is_static = false
 default_backend = "numpy"
