@@ -1,8 +1,8 @@
 """ __init__.py
-Functions and classes for plotting data.
+
 """
 # Package Header #
-from ..header import *
+from ...header import *
 
 # Header #
 __author__ = __author__
@@ -13,5 +13,5 @@ __email__ = __email__
 
 # Imports #
 # Local Packages #
-from .bases import *
-from .series import *
+from .seriesplot import SeriesPlot
+from .timeseriesplot import TimeSeriesPlot

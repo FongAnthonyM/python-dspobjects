@@ -21,7 +21,7 @@ import pytest
 import numpy as np
 
 # Local Packages #
-from dspobjects.plot.series.plottimeseries import plot_time_series
+from dspobjects.plot import TimeSeriesPlot
 
 
 # Definitions #
@@ -44,7 +44,7 @@ class ClassTest(abc.ABC):
         pass
 
 
-class TestPlotTimeSeries():
+class TestTimeSeriesPlot():
 
     def generate_data(self, samples=10240, channels=10):
         voltages = np.random.rand(samples, channels) - .5
@@ -52,6 +52,6 @@ class TestPlotTimeSeries():
 
     def test_plot_time_series(self):
         data = self.generate_data()
-        fig = plot_time_series(y=data, sample_rate=1024.0)
+        fig = TimeSeriesPlot(y=data, sample_rate=1024.0)
         fig.show()
 
