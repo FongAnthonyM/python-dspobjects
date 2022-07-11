@@ -2,7 +2,7 @@
 Functions and classes for plotting data.
 """
 # Package Header #
-from ..header import *
+from ...header import *
 
 # Header #
 __author__ = __author__

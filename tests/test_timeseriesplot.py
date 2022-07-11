@@ -21,7 +21,8 @@ import pytest
 import numpy as np
 
 # Local Packages #
-from dspobjects.plot import TimeSeriesPlot
+from src.dspobjects.plot import Figure
+from src.dspobjects.plot import TimeSeriesPlot
 
 
 # Definitions #
@@ -52,6 +53,10 @@ class TestTimeSeriesPlot():
 
     def test_plot_time_series(self):
         data = self.generate_data()
-        fig = TimeSeriesPlot(y=data, sample_rate=1024.0)
+        fig = Figure()
+        fig.set_subplots(1, 2)
+        plot1 = TimeSeriesPlot(subplot=fig.subplots[0][0], y=data, sample_rate=1024.0)
+        plot1.update_title(text="Test Name")
+        plot2 = TimeSeriesPlot(subplot=fig.subplots[0][1], y=data, sample_rate=1024.0)
         fig.show()
 

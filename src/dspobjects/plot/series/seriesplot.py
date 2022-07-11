@@ -10,6 +10,7 @@ __credits__ = __credits__
 __maintainer__ = __maintainer__
 __email__ = __email__
 
+
 # Imports #
 # Standard Libraries #
 from collections.abc import Iterable
@@ -20,7 +21,7 @@ import numpy as np
 
 # Local Packages #
 from ...operations import iterdim
-from ..bases import BasePlot, Figure
+from ..bases import Figure, Subplot, BasePlot
 
 
 # Definitions #
@@ -35,7 +36,7 @@ class SeriesPlot(BasePlot):
     Args:
 
     """
-    default_layout = dict(
+    default_layout_seetings = dict(
         dragmode="zoom",
         legend=dict(traceorder="reversed"),
         template="plotly_white",
@@ -54,26 +55,20 @@ class SeriesPlot(BasePlot):
     default_xaxis_settings = dict(
         showspikes=True,
         spikemode="across",
-        title=dict(
-            text=x_title,
-            font=dict(size=18),
-        ),
         autorange=True,
         fixedrange=True,
-        range=[x[0], x[-1]],
         rangeslider=dict(
             autorange=False,
-            range=[x[0], x[-1]],
+            thickness=0.04,
+            borderwidth=1,
             yaxis=dict(rangemode="auto")
         ),
     )
     default_yaxis_settings = dict(
-        anchor="free",
+        showgrid=False,
+        tickmode="array",
         autorange=False,
-        mirror=True,
         showline=True,
-        side="left",
-        tickmode="auto",
         ticks="",
         type="linear",
         zeroline=False,
@@ -167,18 +162,18 @@ class SeriesPlot(BasePlot):
         if self.y is not None:
             self.apply_data()
 
-    def generate_x(self):
+    def generate_x(self, n_samples):
         return tuple(range(0, n_samples))
 
     def apply_data(self, x=None, y=None, labels=None):
         if y is not None:
             self.y = y
 
+        n_samples = self.y.shape[self.axis]
         n_channels = self.y.shape[self.c_axis]
         n_additions = n_channels - len(self.traces)
 
-        default_trace = go.Scattergl()
-        default_trace.update(self.new_trace_settings)
+        default_trace = go.Scattergl(**self.new_trace_settings)
         self.add_traces((default_trace,)*n_additions)
 
         if labels is None:
@@ -191,7 +186,7 @@ class SeriesPlot(BasePlot):
 
         if x is None:
             if self.x is None:
-                x = self.generate_x()
+                x = self.generate_x(n_samples=n_samples)
             else:
                 x = self.x
         else:
@@ -203,7 +198,8 @@ class SeriesPlot(BasePlot):
             y_mod = self.y
 
         trace_iter = iter(self.traces)
-        for i, (channel, plot_c, trace) in enumerate(zip(iterdim(self.y, c_axis), iterdim(y_mod, c_axis), trace_iter)):
+        trace_data = zip(iterdim(self.y, self.c_axis), iterdim(y_mod, self.c_axis), trace_iter)
+        for i, (channel, plot_c, trace) in enumerate(trace_data):
             trace.x = x
             trace.y = plot_c + (i * self.trace_offset)
             trace.name = labels[i]
@@ -214,3 +210,14 @@ class SeriesPlot(BasePlot):
             trace.x = None
             trace.y = None
             trace.visible = False
+
+        self.update_xaxis(dict(
+            range=[x[0], x[-1]],
+            rangeslider=dict(range=[x[0], x[-1]]),
+        ))
+
+        self.update_yaxis(dict(
+            range=[-1*self.trace_offset, n_channels*self.trace_offset],
+            tickvals=np.arange(n_channels) * self.trace_offset,
+            ticktext=labels,
+        ))

@@ -10,13 +10,17 @@ __credits__ = __credits__
 __maintainer__ = __maintainer__
 __email__ = __email__
 
+
 # Imports #
 # Standard Libraries #
+from collections.abc import Iterable
 
 # Third-Party Packages #
 import numpy as np
+import plotly.graph_objects as go
 
 # Local Packages #
+from ..bases import Subplot
 from .seriesplot import SeriesPlot
 
 
@@ -99,8 +103,8 @@ class TimeSeriesPlot(SeriesPlot):
             z_score=z_score,
         )
 
-    def generate_x(self):
+    def generate_x(self, n_samples):
         if self.sample_rate is None:
             return tuple(range(0, n_samples))
         else:
-            return np.arange(0, n_samples) / sample_rate
+            return np.arange(0, n_samples) / self.sample_rate

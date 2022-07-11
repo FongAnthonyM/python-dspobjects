@@ -2,7 +2,7 @@
 
 """
 # Package Header #
-from dspobjects.header import *
+from ...header import *
 
 # Header #
 __author__ = __author__
@@ -53,7 +53,7 @@ class Subplot(BaseObject):
 
         # Object Construction #
         if init:
-            self.construct()
+            self.construct(figure=figure, row=row, col=col, title=title)
 
     # Instance Methods #
     # Constructors/Destructors
@@ -78,9 +78,6 @@ class Subplot(BaseObject):
 
         if self.figure is not None and (figure is not None or row is not None or col is not None):
             self.xaxis, self.yaxis = self.figure.get_subplot(self.row, self.col)
-
-            if title is None:
-                self.title = None
 
     def update_title(self, dict1=None, overwrite=False, **kwargs) -> None:
         self.title.update(dict1=dict1, overwrite=overwrite, **kwargs)

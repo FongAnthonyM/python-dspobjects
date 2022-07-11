@@ -34,12 +34,16 @@ class Figure(go.Figure):
     """
     # Magic Methods #
     # Construction/Destruction
-    def __init__(self, data=None, layout=None, frames=None, skip_invalid=False, figure=None **kwargs) -> None:
+    def __init__(self, data=None, layout=None, frames=None, skip_invalid=False, figure=None, **kwargs) -> None:
         # New Attributes #
-        self.subplots: list = []
+        self._subplots: list[Subplot] = []
 
         # Object Construction #
         self.construct(data=data, layout=layout, frames=frames, skip_invalid=skip_invalid, figure=figure, **kwargs)
+
+    @property
+    def subplots(self):
+        return self._subplots
 
     # Instance Methods #
     # Constructors/Destructors
@@ -50,15 +54,15 @@ class Figure(go.Figure):
     def set_subplots(self, rows=None, cols=None, **make_subplots_args) -> "Figure":
         # Ensure there are titles for annotations
         if "subplot_titles" not in make_subplots_args:
-            make_subplots_args["subplot_titles"] = [f"" for i in range(rows*cols)]
+            make_subplots_args["subplot_titles"] = [f" " for i in range(rows*cols)]
 
         super().set_subplots(rows=rows, cols=cols, **make_subplots_args)
 
-        self.subplots.clear()
-        self.subplots.extend([[None]*cols]*rows)
+        self._subplots.clear()
+        self._subplots.extend([None] * cols for r in range(rows))
         for row in range(rows):
-            for col in range(col):
+            for col in range(cols):
                 title = self.layout.annotations[(row * cols) + col]
-                self.subplots[row][col] = subplot = Subplot(figure=self, row=row, col=col, title=title)
+                self._subplots[row][col] = Subplot(figure=self, row=row+1, col=col+1, title=title)
 
         return self

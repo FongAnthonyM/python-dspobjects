@@ -114,7 +114,7 @@ def plot_time_series(fig=None, x=None, y=None, sample_rate=None, labels=None, ax
 
 
 
-    # Update layout
+    # Update new_layout_settings
     fig.update_yaxes(
         range=[-1*scale, n_channels*scale],
         showgrid=False,
@@ -220,7 +220,7 @@ def plot_spectra_series(fig=None, x=None, y=None, labels=None, axis=0, c_axis=1,
         zeroline=False,
     ))
 
-    # Update layout
+    # Update new_layout_settings
     fig.update_yaxes(
         range=[-1*scale, n_channels*scale],
         showgrid=False,

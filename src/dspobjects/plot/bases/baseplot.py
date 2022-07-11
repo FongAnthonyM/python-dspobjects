@@ -2,7 +2,7 @@
 
 """
 # Package Header #
-from ..header import *
+from ...header import *
 
 # Header #
 __author__ = __author__
@@ -34,7 +34,7 @@ class BasePlot(BaseObject):
     Args:
 
     """
-    default_layout = dict()
+    default_layout_seetings = dict()
     default_title_settings = dict()
     default_xaxis_settings = dict()
     default_yaxis_settings = dict()
@@ -50,12 +50,14 @@ class BasePlot(BaseObject):
     ) -> None:
         # New Attributes #
         self.new_trace_settings: dict = self.default_trace_settings.copy()
+        self.new_layout_settings: dict[str, Any] = self.default_layout_seetings.copy()
 
         self.figure: go.Figure | None = None
         self._subplot: Subplot | None = None
+        self._xaxis: go.layout.XAxis | None = None
+        self._yaxis: go.layout.YAxis | None = None
 
-        self.layout: dict[str, Any] = self.default_layout.copy()
-        self.taces: list = []
+        self.traces: list = []
 
         # Object Construction #
         if init:
@@ -63,7 +65,9 @@ class BasePlot(BaseObject):
             
     @property
     def xaxis(self) -> go.layout.XAxis:
-        if self._subplot is not None:
+        if self._xaxis is not None:
+            return self._xaxis
+        elif self._subplot is not None:
             return self._subplot.xaxis
         elif self.figure is not None:
             return self.figure.layout.xaxis
@@ -72,8 +76,8 @@ class BasePlot(BaseObject):
 
     @property
     def yaxis(self) -> go.layout.YAxis:
-        if self._subplot is not None:
-            return self._subplot.yaxis
+        if self._xaxis is not None:
+            return self._xaxis
         elif self.figure is not None:
             return self.figure.layout.yaxis
         else:
@@ -92,13 +96,14 @@ class BasePlot(BaseObject):
 
         if figure is not None:
             self.figure = figure
-            self.figure.update_layout(self.default_layout)
+            self.figure.update_layout(self.default_layout_seetings)
         elif self.figure is None and subplot is None:
-            self.figure = go.Figure()
-            self.figure.update_layout(self.default_layout)
+            self.figure = Figure()
+            self.figure.update_layout(self.default_layout_seetings)
 
         if subplot is not None:
             self._subplot = subplot
+            self.figure = subplot.figure
 
         self.update_xaxis(self.default_xaxis_settings)
         self.update_yaxis(self.default_yaxis_settings)
@@ -114,20 +119,26 @@ class BasePlot(BaseObject):
             y_subplot = f"y{'' if (subplot.col - 1) <= 0 else (subplot.col - 1)}"
             trace.update(xaxis=x_subplot, yaxis=y_subplot)
 
+    def set_xaxis(self):
+        pass
+
+    def set_yaxis(self):
+        pass
+
     def update_title(self, dict1=None, overwrite=False, **kwargs) -> None:
-        if subplot is not None:
+        if self._subplot is not None:
             self._subplot.title.update(dict1=dict1, overwrite=overwrite, **kwargs)
         else:
             self.figure.layout.title.update(dict1=dict1, overwrite=overwrite, **kwargs)
 
     def update_xaxis(self, dict1=None, overwrite=False, **kwargs) -> None:
-        if subplot is not None:
+        if self._subplot is not None:
             self._subplot.xaxis.update(dict1=dict1, overwrite=overwrite, **kwargs)
         else:
             self.figure.layout.xaxis.update(dict1=dict1, overwrite=overwrite, **kwargs)
 
     def update_yaxis(self, dict1=None, overwrite=False, **kwargs) -> None:
-        if subplot is not None:
+        if self._subplot is not None:
             self._subplot.yaxis.update(dict1=dict1, overwrite=overwrite, **kwargs)
         else:
             self.figure.layout.yaxis.update(dict1=dict1, overwrite=overwrite, **kwargs)
