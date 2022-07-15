@@ -13,6 +13,5 @@ __email__ = __email__
 
 # Imports #
 # Local Packages #
-from .seriesplot import SeriesPlot
-from .timeseriesplot import TimeSeriesPlot
-from .spectraplot import SpectraPlot
+from .heatmapplot import HeatmapPlot
+from .spectrogramplot import SpectrogramPlot

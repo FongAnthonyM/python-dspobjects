@@ -36,6 +36,9 @@ class TimeSeriesPlot(SeriesPlot):
     Args:
 
     """
+    default_x_unit = "s"
+    default_y_unit = "mV"
+
     # Magic Methods #
     # Construction/Destruction
     def __init__(
@@ -107,4 +110,4 @@ class TimeSeriesPlot(SeriesPlot):
         if self.sample_rate is None:
             return tuple(range(0, n_samples))
         else:
-            return np.arange(0, n_samples) / self.sample_rate
+            return np.arange(n_samples) / self.sample_rate

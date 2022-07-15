@@ -14,6 +14,7 @@ __email__ = __email__
 # Imports #
 # Standard Libraries #
 from collections.abc import Iterable
+from typing import Any
 
 # Third-Party Packages #
 import plotly.graph_objects as go
@@ -36,7 +37,7 @@ class SeriesPlot(BasePlot):
     Args:
 
     """
-    default_layout_seetings = dict(
+    default_layout_settings: Mapping[str, Any] = BasePlot.default_layout_settings | dict(
         dragmode="zoom",
         legend=dict(traceorder="reversed"),
         template="plotly_white",
@@ -44,7 +45,9 @@ class SeriesPlot(BasePlot):
             t=50,
             b=50
         ),
-        modebar_add=['drawline',
+        modebar_add=['zoom',
+                     'pan',
+                     'drawline',
                      'drawopenpath',
                      'drawclosedpath',
                      'drawcircle',
@@ -52,7 +55,7 @@ class SeriesPlot(BasePlot):
                      'eraseshape'
                      ],
     )
-    default_xaxis_settings = dict(
+    default_xaxis_settings: Mapping[str, Any] = dict(
         showspikes=True,
         spikemode="across",
         autorange=True,
@@ -64,20 +67,23 @@ class SeriesPlot(BasePlot):
             yaxis=dict(rangemode="auto")
         ),
     )
-    default_yaxis_settings = dict(
+    default_yaxis_settings: Mapping[str, Any] = dict(
         showgrid=False,
         tickmode="array",
         autorange=False,
+        fixedrange=False,
         showline=True,
         ticks="",
         type="linear",
         zeroline=False,
     )
-    default_trace_settings = dict(
+    default_trace_settings: Mapping[str, Any] = dict(
         mode="lines",
         line={"width": 1},
         showlegend=True,
     )
+    default_hovertemplate: str | None = ("%{text} %{_y_unit}<br>" +
+                                         "%{x:.4f} %{_x_unit}")
 
 
     # Magic Methods #
@@ -93,20 +99,15 @@ class SeriesPlot(BasePlot):
         c_axis: int = 1,
         t_offset: float = 5.0,
         z_score: bool = True,
+        build: bool = True,
         init: bool = True,
+        **kwargs: Any,
     ) -> None:
         # Parent Attributes #
         super().__init__(init=False)
 
         # New Attributes #
-        self.axis: int = 0
-        self.c_axis: int = 1
-        self.trace_offset: float = 5.0
         self.z_score: bool = True
-
-        self.x = None
-        self.y = None
-        self.labels = None
 
         # Object Construction #
         if init:
@@ -120,6 +121,8 @@ class SeriesPlot(BasePlot):
                 c_axis=c_axis,
                 t_offset=t_offset,
                 z_score=z_score,
+                build=build,
+                **kwargs,
             )
 
     # Instance Methods #
@@ -135,89 +138,143 @@ class SeriesPlot(BasePlot):
         c_axis: int | None = None,
         t_offset: float | None = None,
         z_score: bool | None = None,
+        build: bool = True,
+        **kwargs: Any
     ) -> None:
-        if x is not None:
-            self.x = x
-
-        if y is not None:
-            self.y = y
-
-        if labels is not None:
-            self.labels = labels
-
-        if axis is not None:
-            self.axis = axis
-
-        if c_axis is not None:
-            self.c_axis = c_axis
-
-        if t_offset is not None:
-            self.trace_offset = t_offset
-
         if z_score is not None:
             self.z_score = z_score
 
-        super().construct(figure=figure, subplot=subplot)
+        super().construct(
+            figure=figure,
+            subplot=subplot,
+            x=x,
+            y=y,
+            labels=labels,
+            axis=axis,
+            c_axis=c_axis,
+            t_offset=t_offset,
+            **kwargs,
+        )
 
-        if self.y is not None:
-            self.apply_data()
+        if build and self.y is not None:
+            self.update_plot()
 
-    def generate_x(self, n_samples):
-        return tuple(range(0, n_samples))
+    def _update_attributes(
+        self,
+        x: np.ndarray | None = None,
+        y: np.ndarray | None = None,
+        labels: list | None = None,
+        axis: int | None = None,
+        c_axis: int | None = None,
+        t_offset: float | None = None,
+        z_score: bool | None = None,
+        **kwargs,
+    ) -> None:
+        if z_score is not None:
+            self.z_score = z_score
 
-    def apply_data(self, x=None, y=None, labels=None):
-        if y is not None:
-            self.y = y
+        super()._update_attributes(
+            x=x,
+            y=y,
+            labels=labels,
+            axis=axis,
+            c_axis=c_axis,
+            t_offset=t_offset,
+            **kwargs,
+        )
 
-        n_samples = self.y.shape[self.axis]
-        n_channels = self.y.shape[self.c_axis]
-        n_additions = n_channels - len(self.traces)
+    # Traces
+    def set_trace_color(self, trace: int | BaseTraceType, color: str) -> None:
+        if isinstance(trace, int):
+            trace = self._traces[trace]
 
+        trace.update(line=dict(color=color))
+
+    def update_plot(
+        self,
+        x: np.ndarray | None = None,
+        y: np.ndarray | None = None,
+        labels: list | None = None,
+        axis: int | None = None,
+        c_axis: int | None = None,
+        t_offset: float | None = None,
+        z_score: bool | None = None,
+        **kwargs,
+    ) -> None:
+        self._update_attributes(
+            x=x,
+            y=y,
+            labels=labels,
+            axis=axis,
+            c_axis=c_axis,
+            t_offset=t_offset,
+            **kwargs,
+        )
+
+        # Data Info
+        n_samples = self.y.shape[self._axis]
+        n_channels = self.y.shape[self._c_axis]
+        n_additions = n_channels - len(self._traces)
+
+        # Create New Traces
         default_trace = go.Scattergl(**self.new_trace_settings)
         self.add_traces((default_trace,)*n_additions)
 
-        if labels is None:
-            if self.labels is None:
-                labels = [f"Channel {i}" for i in range(1, n_channels + 1)]
-            else:
-                labels = self.labels
+        # Labeling
+        if self._labels is None:
+            labels = [f"Channel {i}" for i in range(1, n_channels + 1)]
         else:
-            self.labels = labels
+            labels = self._labels
 
-        if x is None:
-            if self.x is None:
-                x = self.generate_x(n_samples=n_samples)
+        # Trace and Legend Names
+        names = [f"[Index {i + 1}] {name}" for i, name in enumerate(labels)] if self._label_index else labels
+
+        # Apply Index to Labels
+        if self._label_index:
+            if self._tick_index_only:
+                tick_labels = [f"[Index {i + 1}]" for i, name in enumerate(labels)]
             else:
-                x = self.x
+                tick_labels = [f"{name} [Index {i + 1}]" for i, name in enumerate(labels)]
         else:
-            self.x = x
+            tick_lables = labels
 
+        # Generate X Data
+        if self.x is None:
+            x = self.generate_x(n_samples=n_samples)
+        else:
+            x = self.x
+
+        # Z Score Y Data
         if self.z_score:
-            y_mod = (self.y - np.nanmean(self.y, axis=self.axis)) / np.nanstd(self.y, axis=self.axis)
+            y_mod = (self.y - np.nanmean(self.y, axis=self._axis)) / np.nanstd(self.y, axis=self._axis)
         else:
             y_mod = self.y
 
-        trace_iter = iter(self.traces)
-        trace_data = zip(iterdim(self.y, self.c_axis), iterdim(y_mod, self.c_axis), trace_iter)
+        # Apply Data to Traces
+        trace_iter = iter(self._traces)
+        trace_data = zip(iterdim(self.y, self._c_axis), iterdim(y_mod, self._c_axis), trace_iter)
         for i, (channel, plot_c, trace) in enumerate(trace_data):
-            trace.x = x
-            trace.y = plot_c + (i * self.trace_offset)
-            trace.name = labels[i]
-            trace.text = [f"{c:.4f}" for c in channel],
+            trace.x = np.squeeze(x)
+            trace.y = plot_c + (i * self._trace_offset)
+            trace.name = names[i]
+            trace.text = [f"{c:.4f}" for c in channel]
             trace.visible = True
 
+        # Turn Off Unused Traces
         for trace in trace_iter:
             trace.x = None
             trace.y = None
             trace.visible = False
 
-        self.update_xaxis(dict(
-            range=[x[0], x[-1]],
-            rangeslider=dict(range=[x[0], x[-1]]),
+        # Apply Labels and Range
+        self.update_yaxis(dict(
+            range=[-1 * self._trace_offset, n_channels * self._trace_offset],
+            tickvals=np.arange(n_channels) * self._trace_offset,
+            ticktext=tick_labels,
         ))
 
-        self.update_yaxis(dict(
-            range=[-1*self.trace_offset, n_channels*self.trace_offset],
-            tickvals=np.arange(n_channels) * self.trace_offset,
-            ticktext=labels,
+        # Apply Range and Slider
+        self.update_xaxis(dict(
+            range=[x[0], x[-1]],
+            rangeslider=dict(range=[float(x[0]), float(x[-1])]),
         ))

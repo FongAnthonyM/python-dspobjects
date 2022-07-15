@@ -22,14 +22,14 @@ import numpy as np
 # Definitions #
 # Functions #
 def iterdim(a: np.ndarray, axis: int = 0) -> np.ndarray:
-    """Iterates over a given axis of an array.
+    """Iterates over a given _axis of an array.
 
     Args:
         a: The array to iterate through.
-        axis: The axis to iterate over.
+        axis: The _axis to iterate over.
 
     Returns:
-        The data at an element of the axis.
+        The data at an element of the _axis.
     """
     slices = (slice(None),) * axis
     for i in range(a.shape[axis]):

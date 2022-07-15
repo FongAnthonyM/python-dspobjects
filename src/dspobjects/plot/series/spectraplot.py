@@ -1,4 +1,4 @@
-""" __init__.py
+""" spectraplot.py
 
 """
 # Package Header #
@@ -12,7 +12,23 @@ __email__ = __email__
 
 
 # Imports #
+# Standard Libraries #
+
+# Third-Party Packages #
+
 # Local Packages #
 from .seriesplot import SeriesPlot
-from .timeseriesplot import TimeSeriesPlot
-from .spectraplot import SpectraPlot
+
+# Definitions #
+# Classes #
+class SpectraPlot(SeriesPlot):
+    """
+
+    Class Attributes:
+
+    Attributes:
+
+    Args:
+
+    """
+    default_x_unit = "Hz"

@@ -14,4 +14,6 @@ __email__ = __email__
 # Imports #
 # Local Packages #
 from .bases import *
+from .bars import *
+from .heatmaps import *
 from .series import *

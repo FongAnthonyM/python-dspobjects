@@ -1,4 +1,4 @@
-""" figure.py
+""" _figure.py
 
 """
 # Package Header #
@@ -9,6 +9,7 @@ __author__ = __author__
 __credits__ = __credits__
 __maintainer__ = __maintainer__
 __email__ = __email__
+
 
 # Imports #
 # Standard Libraries #
@@ -48,7 +49,7 @@ class Figure(go.Figure):
     # Instance Methods #
     # Constructors/Destructors
     def construct(self, data=None, layout=None, frames=None, skip_invalid=False, figure=None, **kwargs) -> None:
-        data = figure or data  # Override the data to figure if given.
+        data = figure or data  # Override the data to _figure if given.
         super().__init__(data=data, layout=layout, frames=frames, skip_invalid=skip_invalid, **kwargs)
 
     def set_subplots(self, rows=None, cols=None, **make_subplots_args) -> "Figure":
