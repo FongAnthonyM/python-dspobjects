@@ -13,6 +13,7 @@ __email__ = __email__
 
 # Imports #
 # Standard Libraries #
+from typing import Any
 
 # Third-Party Packages #
 import numpy as np
@@ -52,6 +53,8 @@ class HeatmapPlot(BasePlot):
             c_axis: int = 1,
             t_offset: float = 5.0,
             init: bool = True,
+            build: bool = True,
+            **kwargs: Any,
     ) -> None:
         # Parent Attributes #
         super().__init__(init=False)
@@ -74,6 +77,8 @@ class HeatmapPlot(BasePlot):
                 axis=axis,
                 c_axis=c_axis,
                 t_offset=t_offset,
+                buid=build,
+                **kwargs,
             )
 
     # Instance Methods #
@@ -91,6 +96,8 @@ class HeatmapPlot(BasePlot):
             axis: int | None = None,
             c_axis: int | None = None,
             t_offset: float | None = None,
+            build: bool = True,
+            **kwargs: Any,
     ) -> None:
         if names is not None:
             self._names = names
@@ -108,6 +115,7 @@ class HeatmapPlot(BasePlot):
             axis=axis,
             c_axis=c_axis,
             t_offset=t_offset,
+            **kwargs,
         )
 
         if self.z is not None:

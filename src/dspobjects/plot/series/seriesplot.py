@@ -17,6 +17,7 @@ from collections.abc import Iterable
 from typing import Any
 
 # Third-Party Packages #
+from plotly.basedatatypes import BaseTraceType
 import plotly.graph_objects as go
 import numpy as np
 
@@ -37,7 +38,7 @@ class SeriesPlot(BasePlot):
     Args:
 
     """
-    default_layout_settings: Mapping[str, Any] = BasePlot.default_layout_settings | dict(
+    default_layout_settings: dict[str, Any] = BasePlot.default_layout_settings | dict(
         dragmode="zoom",
         legend=dict(traceorder="reversed"),
         template="plotly_white",
@@ -55,7 +56,7 @@ class SeriesPlot(BasePlot):
                      'eraseshape'
                      ],
     )
-    default_xaxis_settings: Mapping[str, Any] = dict(
+    default_xaxis_settings: dict[str, Any] = dict(
         showspikes=True,
         spikemode="across",
         autorange=True,
@@ -67,7 +68,7 @@ class SeriesPlot(BasePlot):
             yaxis=dict(rangemode="auto")
         ),
     )
-    default_yaxis_settings: Mapping[str, Any] = dict(
+    default_yaxis_settings: dict[str, Any] = dict(
         showgrid=False,
         tickmode="array",
         autorange=False,
@@ -77,14 +78,13 @@ class SeriesPlot(BasePlot):
         type="linear",
         zeroline=False,
     )
-    default_trace_settings: Mapping[str, Any] = dict(
+    default_trace_settings: dict[str, Any] = dict(
         mode="lines",
         line={"width": 1},
         showlegend=True,
     )
     default_hovertemplate: str | None = ("%{text} %{_y_unit}<br>" +
                                          "%{x:.4f} %{_x_unit}")
-
 
     # Magic Methods #
     # Construction/Destruction
@@ -107,7 +107,7 @@ class SeriesPlot(BasePlot):
         super().__init__(init=False)
 
         # New Attributes #
-        self.z_score: bool = True
+        self._z_score: bool = True
 
         # Object Construction #
         if init:
@@ -125,6 +125,10 @@ class SeriesPlot(BasePlot):
                 **kwargs,
             )
 
+    @property
+    def z_score(self) -> bool:
+        return self._z_score
+
     # Instance Methods #
     # Constructors/Destructors
     def construct(
@@ -141,9 +145,6 @@ class SeriesPlot(BasePlot):
         build: bool = True,
         **kwargs: Any
     ) -> None:
-        if z_score is not None:
-            self.z_score = z_score
-
         super().construct(
             figure=figure,
             subplot=subplot,
@@ -153,6 +154,7 @@ class SeriesPlot(BasePlot):
             axis=axis,
             c_axis=c_axis,
             t_offset=t_offset,
+            z_score=z_score,
             **kwargs,
         )
 
@@ -168,10 +170,10 @@ class SeriesPlot(BasePlot):
         c_axis: int | None = None,
         t_offset: float | None = None,
         z_score: bool | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         if z_score is not None:
-            self.z_score = z_score
+            self._z_score = z_score
 
         super()._update_attributes(
             x=x,
@@ -208,6 +210,7 @@ class SeriesPlot(BasePlot):
             axis=axis,
             c_axis=c_axis,
             t_offset=t_offset,
+            z_score=z_score,
             **kwargs,
         )
 
@@ -217,26 +220,14 @@ class SeriesPlot(BasePlot):
         n_additions = n_channels - len(self._traces)
 
         # Create New Traces
-        default_trace = go.Scattergl(**self.new_trace_settings)
+        default_trace = go.Scattergl(**self._trace_settings)
         self.add_traces((default_trace,)*n_additions)
 
-        # Labeling
-        if self._labels is None:
-            labels = [f"Channel {i}" for i in range(1, n_channels + 1)]
-        else:
-            labels = self._labels
+        # Generate Labels
+        labels = self.generate_labels(n_labels=n_channels)
 
-        # Trace and Legend Names
-        names = [f"[Index {i + 1}] {name}" for i, name in enumerate(labels)] if self._label_index else labels
-
-        # Apply Index to Labels
-        if self._label_index:
-            if self._tick_index_only:
-                tick_labels = [f"[Index {i + 1}]" for i, name in enumerate(labels)]
-            else:
-                tick_labels = [f"{name} [Index {i + 1}]" for i, name in enumerate(labels)]
-        else:
-            tick_lables = labels
+        names = self.generate_names(names=labels)
+        tick_labels = self.generate_tick_labels(labels=labels)
 
         # Generate X Data
         if self.x is None:

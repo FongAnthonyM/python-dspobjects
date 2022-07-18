@@ -14,6 +14,7 @@ __email__ = __email__
 # Imports #
 # Standard Libraries #
 from collections.abc import Iterable
+from typing import Any
 
 # Third-Party Packages #
 import numpy as np
@@ -36,8 +37,8 @@ class TimeSeriesPlot(SeriesPlot):
     Args:
 
     """
-    default_x_unit = "s"
-    default_y_unit = "mV"
+    default_x_unit: str | None = "s"
+    default_y_unit: str | None = "mV"
 
     # Magic Methods #
     # Construction/Destruction
@@ -54,12 +55,13 @@ class TimeSeriesPlot(SeriesPlot):
         t_offset: float = 5.0,
         z_score: bool = True,
         init: bool = True,
+        **kwargs: Any,
     ) -> None:
         # Parent Attributes #
         super().__init__(init=False)
 
         # New Attributes #
-        self.sample_rate: float | None = None
+        self._sample_rate: float | None = None
 
         # Object Construction #
         if init:
@@ -74,14 +76,16 @@ class TimeSeriesPlot(SeriesPlot):
                 c_axis=c_axis,
                 t_offset=t_offset,
                 z_score=z_score,
+                **kwargs,
             )
 
+    @property
+    def sample_rate(self) -> float | None:
+        return self._sample_rate
+
     # Instance Methods #
-    # Constructors/Destructors
-    def construct(
+    def _update_attributes(
         self,
-        figure: go.Figure | None = None,
-        subplot: Subplot | None = None,
         x: np.ndarray | None = None,
         y: np.ndarray | None = None,
         sample_rate: float | None = None,
@@ -90,13 +94,12 @@ class TimeSeriesPlot(SeriesPlot):
         c_axis: int | None = None,
         t_offset: float | None = None,
         z_score: bool | None = None,
+        **kwargs: Any,
     ) -> None:
         if sample_rate is not None:
-            self.sample_rate = sample_rate
+            self._sample_rate = sample_rate
 
-        super().construct(
-            figure=figure,
-            subplot=subplot,
+        super()._update_attributes(
             x=x,
             y=y,
             labels=labels,
@@ -104,10 +107,12 @@ class TimeSeriesPlot(SeriesPlot):
             c_axis=c_axis,
             t_offset=t_offset,
             z_score=z_score,
+            **kwargs,
         )
 
-    def generate_x(self, n_samples):
-        if self.sample_rate is None:
+    # Data Generation
+    def generate_x(self, n_samples: int):
+        if self._sample_rate is None:
             return tuple(range(0, n_samples))
         else:
-            return np.arange(n_samples) / self.sample_rate
+            return np.arange(n_samples) / self._sample_rate

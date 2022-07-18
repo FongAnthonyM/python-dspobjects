@@ -19,6 +19,7 @@ __email__ = __email__
 # Local Packages #
 from .seriesplot import SeriesPlot
 
+
 # Definitions #
 # Classes #
 class SpectraPlot(SeriesPlot):
@@ -31,4 +32,4 @@ class SpectraPlot(SeriesPlot):
     Args:
 
     """
-    default_x_unit = "Hz"
+    default_x_unit: str | None = "Hz"
