@@ -23,7 +23,7 @@ from scipy import signal
 
 # Local Packages #
 from src.dspobjects.plot import Figure
-from src.dspobjects.plot import SpectrogramPlot
+from src.dspobjects.plot import SpectrogramGroup
 
 
 # Definitions #
@@ -46,9 +46,9 @@ class ClassTest(abc.ABC):
         pass
 
 
-class TestSpectrogramsPlot():
+class TestSpectrogramGroup():
 
-    def generate_data(self, samples=10240, channels=10):
+    def generate_data(self):
         # Create Signal
         rng = np.random.default_rng()
         fs = 10e3
@@ -57,28 +57,30 @@ class TestSpectrogramsPlot():
         noise_power = 0.01 * fs / 2
         time = np.arange(N) / float(fs)
         mod = 500 * np.cos(2 * np.pi * 0.25 * time)
-        carrier = amp * np.sin(2 * np.pi * 3e3 * time + mod)
+        carrier = amp * np.sin(2 * np.pi * 1e3 * time + mod)
         noise = rng.normal(scale=np.sqrt(noise_power), size=time.shape)
         noise *= np.exp(-time / 5)
         x = carrier + noise
 
         # Generate Spectrogram
-        return signal.spectrogram(x, fs)
+        f, t, Sxx = signal.spectrogram(x, fs)
+        return x, f, t, Sxx
 
-    def test_spectrogramplot_figure(self):
-        f, t, Sxx = self.generate_data()
-        plot1 = SpectrogramPlot(x=t, y=f, z=Sxx)
-        plot1.update_title(text="Test Name")
-        plot1._figure.show(aspect='auto')
+    def test_spectrogramgroup_figure(self):
+        y, f, t, Sxx = self.generate_data()
+        sp_group = SpectrogramGroup()
+        sp_group["spectrogram"].build(x=t, y=f, z=Sxx)
+        sp_group["timeseries"].build(y=np.expand_dims(y, 1), sample_rate=10e3)
+        sp_group.figure.show()
 
     def test_spectrogramplot_subplot(self):
         f, t, Sxx = self.generate_data()
         fig = Figure()
         fig.update_layout(title="Figure Name")
-        fig.set_subplots(3, 1, horizontal_spacing=0.05)
+        fig.set_subplots(1, 3, horizontal_spacing=0.05)
         plot1 = SpectrogramPlot(subplot=fig.subplots[0][0], x=t, y=f, z=Sxx)
-        # plot2 = SpectrogramPlot(subplot=fig.subplots[1][0], x=t, y=f, z=Sxx)
+        plot2 = SpectrogramPlot(subplot=fig.subplots[0][1], x=t, y=f, z=Sxx)
         plot1.update_title(text="Test Name")
+        # plot2 = TimeSeriesPlot(subplot=fig.subplots[0][1], y=data, sample_rate=1024.0)
         fig.show()
-
 

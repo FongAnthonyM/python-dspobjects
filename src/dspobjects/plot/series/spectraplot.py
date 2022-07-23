@@ -17,12 +17,12 @@ __email__ = __email__
 # Third-Party Packages #
 
 # Local Packages #
-from .seriesplot import SeriesPlot
+from .stackedseriesplot import StackedSeriesPlot
 
 
 # Definitions #
 # Classes #
-class SpectraPlot(SeriesPlot):
+class SpectraPlot(StackedSeriesPlot):
     """
 
     Class Attributes:

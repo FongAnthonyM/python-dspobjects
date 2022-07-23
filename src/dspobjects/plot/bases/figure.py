@@ -67,3 +67,13 @@ class Figure(go.Figure):
                 self._subplots[row][col] = Subplot(figure=self, row=row+1, col=col+1, title=title)
 
         return self
+
+    def get_legendgroups(self):
+        return set(trace.legendgroup for trace in self.data if trace.legendgroup is not None)
+
+    def to_image(self, *args, rangeslider_visible=False, **kwargs):
+
+        if not rangeslider_visible:
+            self.update_xaxes(dict(rangeslider={"visible": False}))
+
+        super().to_image(*args, *kwargs)

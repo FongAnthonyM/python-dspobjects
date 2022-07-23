@@ -13,13 +13,16 @@ __email__ = __email__
 
 # Imports #
 # Standard Libraries #
+from collections.abc import Iterable
 from typing import Any
 
 # Third-Party Packages #
 import numpy as np
+from plotly.basedatatypes import BaseTraceType
 import plotly.graph_objects as go
 
 # Local Packages #
+from ...operations import iterdim
 from ..bases import Subplot, BasePlot
 
 
@@ -35,115 +38,75 @@ class HeatmapPlot(BasePlot):
     Args:
 
     """
+    default_hovertemplate: str | None = ("%{z:.4f} %{_z_unit}<br>" +
+                                         "%{y:.4f} %{_y_unit}<br>" +
+                                         "%{x:.4f} %{_x_unit}")
     default_color_sequence: list | None = None
 
     # Magic Methods #
     # Construction/Destruction
-    def __init__(
-            self,
-            figure: go.Figure | None = None,
-            subplot: Subplot | None = None,
-            x: np.ndarray | None = None,
-            y: np.ndarray | None = None,
-            z: np.ndarray | None = None,
-            labels: list | None = None,
-            names: list | None = None,
-            separated: bool = False,
-            axis: int = 0,
-            c_axis: int = 1,
-            t_offset: float = 5.0,
-            init: bool = True,
-            build: bool = True,
-            **kwargs: Any,
-    ) -> None:
-        # Parent Attributes #
-        super().__init__(init=False)
 
-        # New Attributes #
-        self._separated_bands: bool = False
-        self._names = None
 
-        # Object Construction #
-        if init:
-            self.construct(
-                figure=figure,
-                subplot=subplot,
-                x=x,
-                y=y,
-                z=z,
-                labels=labels,
-                names=names,
-                separated=separated,
-                axis=axis,
-                c_axis=c_axis,
-                t_offset=t_offset,
-                buid=build,
-                **kwargs,
-            )
 
     # Instance Methods #
     # Constructors/Destructors
-    def construct(
-            self,
-            figure: go.Figure | None = None,
-            subplot: Subplot | None = None,
-            x: np.ndarray | None = None,
-            y: np.ndarray | None = None,
-            z: np.ndarray | None = None,
-            labels: list | None = None,
-            names: list | None = None,
-            separated: bool | None = None,
-            axis: int | None = None,
-            c_axis: int | None = None,
-            t_offset: float | None = None,
-            build: bool = True,
-            **kwargs: Any,
+    def build(
+        self,
+        x: np.ndarray | None = None,
+        y: np.ndarray | None = None,
+        z: np.ndarray | None = None,
+        labels: list | None = None,
+        **kwargs: Any,
     ) -> None:
-        if names is not None:
-            self._names = names
-
-        if separated is not None:
-            self._separated_bands = separated
-
-        super().construct(
-            figure=figure,
-            subplot=subplot,
+        self._update_attributes(
             x=x,
             y=y,
             z=z,
             labels=labels,
-            axis=axis,
-            c_axis=c_axis,
-            t_offset=t_offset,
             **kwargs,
         )
 
         if self.z is not None:
-            # Apply Data
-            self.apply_data()
+            self.update_plot()
 
-    def set_trace_color(self, trace, color):
+    def set_trace_color(self, trace: int | BaseTraceType, color: str) -> None:
         if isinstance(trace, int):
             trace = self._traces[trace]
 
         trace.colorscale = color
 
-    def apply_single_trace(self, x=None, y=None, z=None):
-        x = self.x if x is None else x
-        y = self.y if y is None else y
-        z = self.z if z is None else z
+    def update_plot(
+        self,
+        x: np.ndarray | None = None,
+        y: np.ndarray | None = None,
+        z: np.ndarray | None = None,
+        labels: list | None = None,
+        **kwargs: Any,
+    ) -> None:
+        self._update_attributes(
+            x=x,
+            y=y,
+            z=z,
+            labels=labels,
+            **kwargs,
+        )
+        # Handle Legend Groups
+        if self._group_existing_legend:
+            existing_group = self._figure.get_legendgroups()
+        else:
+            existing_group = {}
 
-        if len(self._traces) < 1:
-            default_trace = go.Heatmap(**self.new_trace_settings)
-            self.add_traces((default_trace,))
+        if len(self._trace_groups["data"]) < 1:
+            default_trace = go.Heatmap()
+            self.add_traces((default_trace,), group="data")
 
-        trace_iter = iter(self._traces)
+        trace_iter = iter(self._trace_groups["data"])
         trace = next(trace_iter)
 
         trace.update(dict(
-            x=np.squeeze(x),
-            y=np.squeeze(y),
-            z=z,
+            x=self.generate_x(self.z.shape[0]),
+            y=self.generate_y(self.z.shape[1]),
+            z=self.z,
         ))
 
         for trace in trace_iter:
@@ -151,18 +114,3 @@ class HeatmapPlot(BasePlot):
             trace.y = None
             trace.z = None
             trace.visible = False
-
-    def apply_separate_row_traces(self):
-        pass
-
-    def apply_data(self, x=None, y=None, labels=None):
-        if x is not None:
-            self.x = x
-
-        if y is not None:
-            self.y = y
-
-        if self._separated_bands:
-            self.apply_separate_row_traces()
-        else:
-            self.apply_single_trace()

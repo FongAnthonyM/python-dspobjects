@@ -21,13 +21,13 @@ import numpy as np
 import plotly.graph_objects as go
 
 # Local Packages #
-from ..bases import Subplot
-from .seriesplot import SeriesPlot
+from ..bases import Figure, Subplot
+from .stackedseriesplot import StackedSeriesPlot
 
 
 # Definitions #
 # Classes #
-class TimeSeriesPlot(SeriesPlot):
+class TimeSeriesPlot(StackedSeriesPlot):
     """
 
     Class Attributes:
@@ -44,12 +44,13 @@ class TimeSeriesPlot(SeriesPlot):
     # Construction/Destruction
     def __init__(
         self,
-        figure: go.Figure | None = None,
+        figure: Figure | None = None,
         subplot: Subplot | None = None,
         x: np.ndarray | None = None,
         y: np.ndarray | None = None,
         sample_rate: float | None = None,
         labels: Iterable[str] | None = None,
+
         axis: int = 0,
         c_axis: int = 1,
         t_offset: float = 5.0,
@@ -111,8 +112,10 @@ class TimeSeriesPlot(SeriesPlot):
         )
 
     # Data Generation
-    def generate_x(self, n_samples: int):
-        if self._sample_rate is None:
+    def generate_x(self, n_samples: int) -> Iterable:
+        if self.x is not None:
+            return np.squeeze(self.x)
+        elif self._sample_rate is None:
             return tuple(range(0, n_samples))
         else:
             return np.arange(n_samples) / self._sample_rate

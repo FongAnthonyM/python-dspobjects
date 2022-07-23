@@ -51,6 +51,7 @@ class BasePlot(BaseObject):
             xanchor='center',
             yanchor='top'),
     )
+    default_title_settings: dict[str, Any] = dict()
     default_xaxis_settings: dict[str, Any] = dict()
     default_yaxis_settings: dict[str, Any] = dict()
     default_trace_settings: dict[str, Any] = dict()
@@ -64,18 +65,25 @@ class BasePlot(BaseObject):
     # Construction/Destruction
     def __init__(
         self,
-        figure: go.Figure | None = None,
+        figure: Figure | None = None,
         subplot: Subplot | None = None,
         name: str = "",
         x: np.ndarray | None = None,
         y: np.ndarray | None = None,
         z: np.ndarray | None = None,
         labels: list | None = None,
+        label_axis: bool = False,
         label_index: bool = True,
         tick_index_only: bool = False,
+        names: list | None = None,
         axis: int = 0,
         c_axis: int = 1,
         t_offset: float = 5.0,
+        trace_settings: dict[str, Any] | None = None,
+        title: dict[str, Any] | None = None,
+        xaxis: dict[str, Any] | None = None,
+        yaxis: dict[str, Any] | None = None,
+        build: bool = True,
         init: bool = True,
     ) -> None:
         # New Attributes #
@@ -83,16 +91,19 @@ class BasePlot(BaseObject):
         self._layout_settings: dict[str, Any] = self.default_layout_settings.copy()
         self._trace_settings_: dict[str, Any] = self.default_trace_settings.copy()
         self._hovertemplate_: str | None = self.default_hovertemplate
+        self._group_existing_legend: bool = False
 
         self._color_sequence: list | None = None
         self._color_cycle: Iterator | None = None
 
         self._name: str = ""
+        self._names: Iterable[str | None] = None
         self._trace_offset: float = 5.0
 
         self._axis: int = 0
         self._c_axis: int = 1
 
+        self._label_axis: bool = True
         self._label_index: bool = True
         self._tick_index_only: bool = True
 
@@ -101,7 +112,7 @@ class BasePlot(BaseObject):
         self._z_unit: str = self.default_z_unit
 
         # Component Objects
-        self._figure: go.Figure | None = None
+        self._figure: Figure | None = None
         self._subplot: Subplot | None = None
         self._xaxis: go.layout.XAxis | None = None
         self._yaxis: go.layout.YAxis | None = None
@@ -113,6 +124,7 @@ class BasePlot(BaseObject):
 
         self._labels: Iterable[str] | None = None
 
+        self._trace_groups: dict[str, Iterable[BaseTraceType]] = {"static": [], "data": []}
         self._traces: list[BaseTraceType] = []
 
         # Object Construction #
@@ -129,15 +141,22 @@ class BasePlot(BaseObject):
                 y=y,
                 z=z,
                 labels=labels,
+                label_axis=label_axis,
                 label_index=label_index,
                 tick_index_only=tick_index_only,
+                names=names,
                 axis=axis,
                 c_axis=c_axis,
                 t_offset=t_offset,
+                trace_settings=trace_settings,
+                title=title,
+                xaxis=xaxis,
+                yaxis=yaxis,
+                build=build,
             )
 
     @property
-    def _trace_settings(self) -> Mapping[str, Any]:
+    def _trace_settings(self) -> dict[str, Any]:
         _trace_settings = self._trace_settings_.copy()
         if "hovertemplate" not in _trace_settings and self._hovertemplate:
             _trace_settings["hovertemplate"] = self._hovertemplate
@@ -199,7 +218,7 @@ class BasePlot(BaseObject):
         return self._z_unit
 
     @property
-    def figure(self) -> go.Figure | None:
+    def figure(self) -> Figure | None:
         return self._figure
 
     @property
@@ -272,6 +291,14 @@ class BasePlot(BaseObject):
         return copy.copy(self._labels)
 
     @property
+    def names(self) -> Iterable[str]:
+        return self._names
+
+    @property
+    def trace_groups(self) -> dict[str, Iterable[BaseTraceType]]:
+        return self._trace_groups
+
+    @property
     def traces(self) -> tuple[BaseTraceType]:
         return tuple(self._traces)
 
@@ -279,18 +306,25 @@ class BasePlot(BaseObject):
     # Constructors/Destructors
     def construct(
         self,
-        figure: go.Figure | None = None,
+        figure: Figure | None = None,
         subplot: Subplot | None = None,
         name: str | None = None,
         x: np.ndarray | None = None,
         y: np.ndarray | None = None,
         z: np.ndarray | None = None,
         labels: list | None = None,
+        label_axis: bool | None = None,
         label_index: bool | None = None,
         tick_index_only: bool | None = None,
+        names: list | None = None,
         axis: int | None = None,
         c_axis: int | None = None,
         t_offset: float | None = None,
+        trace_settings: dict[str, Any] | None = None,
+        title: dict[str, Any] | None = None,
+        xaxis: dict[str, Any] | None = None,
+        yaxis: dict[str, Any] | None = None,
+        build: bool = True,
         **kwargs: Any,
     ) -> None:
         self._update_attributes(
@@ -301,31 +335,44 @@ class BasePlot(BaseObject):
             y=y,
             z=z,
             labels=labels,
+            label_axis=label_axis,
             label_index=label_index,
             tick_index_only=tick_index_only,
             axis=axis,
             c_axis=c_axis,
             t_offset=t_offset,
+            trace_settings=trace_settings,
             **kwargs,
         )
 
-        self.update_xaxis(self.default_xaxis_settings)
-        self.update_yaxis(self.default_yaxis_settings)
+        title_settings = self.default_title_settings | title if title is not None else self.default_title_settings
+        xaxis_settings = self.default_xaxis_settings | xaxis if xaxis is not None else self.default_xaxis_settings
+        yaxis_settings = self.default_yaxis_settings | yaxis if yaxis is not None else self.default_yaxis_settings
+
+        self.update_title(title_settings)
+        self.update_xaxis(xaxis_settings)
+        self.update_yaxis(yaxis_settings)
+
+        if build:
+            self.build()
 
     def _update_attributes(
         self,
-        figure: go.Figure | None = None,
+        figure: Figure | None = None,
         subplot: Subplot | None = None,
         name: str | None = None,
         x: np.ndarray | None = None,
         y: np.ndarray | None = None,
         z: np.ndarray | None = None,
         labels: list | None = None,
+        label_axis: bool | None = None,
         label_index: bool | None = None,
         tick_index_only: bool | None = None,
+        names: list | None = None,
         axis: int | None = None,
         c_axis: int | None = None,
         t_offset: float | None = None,
+        trace_settings: dict[str, Any] | None = None,
         **kwargs: Any,
     ) -> None:
         if figure is not None and subplot is not None:
@@ -334,7 +381,6 @@ class BasePlot(BaseObject):
 
         if figure is not None:
             self._figure = figure
-            self._figure.update_layout(self.default_layout_settings)
         elif self._figure is None and subplot is None:
             self._figure = Figure()
             self._figure.update_layout(self.default_layout_settings)
@@ -345,6 +391,9 @@ class BasePlot(BaseObject):
 
         if name is not None:
             self._name = name
+
+        if names is not None:
+            self._names = names
 
         if x is not None:
             self.x = x
@@ -357,6 +406,9 @@ class BasePlot(BaseObject):
 
         if labels is not None:
             self._labels = labels
+
+        if label_axis is not None:
+            self._label_axis = label_axis
 
         if label_index is not None:
             self._label_index = label_index
@@ -373,27 +425,77 @@ class BasePlot(BaseObject):
         if t_offset is not None:
             self._trace_offset = t_offset
 
+        if trace_settings is not None:
+            self._trace_settings_.update(trace_settings)
+
+    def build(
+        self,
+        figure: Figure | None = None,
+        subplot: Subplot | None = None,
+        name: str | None = None,
+        x: np.ndarray | None = None,
+        y: np.ndarray | None = None,
+        z: np.ndarray | None = None,
+        labels: list | None = None,
+        label_axis: bool | None = None,
+        label_index: bool | None = None,
+        tick_index_only: bool | None = None,
+        names: list | None = None,
+        axis: int | None = None,
+        c_axis: int | None = None,
+        t_offset: float | None = None,
+        **kwargs: Any,
+    ) -> None:
+        self._update_attributes(
+            figure=figure,
+            subplot=subplot,
+            name=name,
+            x=x,
+            y=y,
+            z=z,
+            labels=labels,
+            label_axis=label_axis,
+            label_index=label_index,
+            tick_index_only=tick_index_only,
+            axis=axis,
+            c_axis=c_axis,
+            t_offset=t_offset,
+            **kwargs,
+        )
+
     # Subplot and Axes
-    def set_subplot(self, subplot: Subplot) -> None:
+    def _set_subplot(self, row: int, col: int):
+        for trace in self._traces:
+            x_subplot = f"x{'' if (row - 1) <= 0 else (row - 1)}"
+            y_subplot = f"y{'' if (col - 1) <= 0 else (col - 1)}"
+            trace.update(xaxis=x_subplot, yaxis=y_subplot)
+
+    @singlekwargdispatchmethod
+    def set_subplot(self, subplot: Subplot | None = None, row: int | None = None, col: int | None = None):
+        raise ValueError(f"{type(subplot)} is an invalid type for set_subplot")
+
+    @set_subplot.register
+    def _set_subplot_(self, subplot: Subplot, **kwargs: Any):
         if subplot.figure != self._figure:
             raise ValueError("Cannot change plot to different figure, create new plot instead.")
 
         self._subplot = subplot
+        self._set_subplot(row=subplot.row, col=subplot.col)
 
-        for trace in self._traces:
-            x_subplot = f"x{'' if (subplot.row - 1) <= 0 else (subplot.row - 1)}"
-            y_subplot = f"y{'' if (subplot.col - 1) <= 0 else (subplot.col - 1)}"
-            trace.update(xaxis=x_subplot, yaxis=y_subplot)
+    @set_subplot.register
+    def _set_subplot_(self, row: int, col: int, **kwargs: Any):
+        self._subplot = self._figure.get_subplot(row=row, col=col)
+        self._set_subplot(row=row, col=col)
 
     def set_xaxis(self, xaxis: go.layout.XAxis) -> None:
         self._xaxis = xaxis
-        axis_name = xaxis.plotly_name.replace("_axis", '')
+        axis_name = xaxis.plotly_name.replace("axis", '')
         for trace in self._traces:
             trace.update(xaxis=axis_name)
 
     def set_yaxis(self, yaxis: go.layout.YAxis) -> None:
         self._yaxis = yaxis
-        axis_name = yaxis.plotly_name.replace("_axis", '')
+        axis_name = yaxis.plotly_name.replace("axis", '')
         for trace in self._traces:
             trace.update(yaxis=axis_name)
 
@@ -421,13 +523,17 @@ class BasePlot(BaseObject):
         if isinstance(trace, int):
             trace = self._traces[trace]
 
-    def _add_traces(self, traces: Iterable[BaseTraceType]) -> None:
-        trace_defaults = dict()
+    def _add_traces(self, traces: Iterable[BaseTraceType], group: str | None = None) -> None:
+        if group is not None and group not in self._trace_groups:
+            self._trace_groups[group] = []
+
+        # Trace Settings
+        trace_defaults = self._trace_settings.copy()
         if self._xaxis is not None:
-            trace_defaults["xaxis"] = self._xaxis.plotly_name.replace("_axis", '')
+            trace_defaults["xaxis"] = self._xaxis.plotly_name.replace("axis", '')
 
         if self._yaxis is not None:
-            trace_defaults["yaxis"] = self._yaxis.plotly_name.replace("_axis", '')
+            trace_defaults["yaxis"] = self._yaxis.plotly_name.replace("axis", '')
 
         for trace in traces:
             if self._subplot is not None:
@@ -442,18 +548,20 @@ class BasePlot(BaseObject):
                 self.set_trace_color(new_trace, next(self._color_cycle))
 
             self._traces.append(new_trace)
+            if group is not None:
+                self._trace_groups[group].append(new_trace)
 
     @singlekwargdispatchmethod("traces")
-    def add_traces(self, traces, *args: BaseTraceType) -> None:
+    def add_traces(self, traces, *args: BaseTraceType, group: str | None = None) -> None:
         raise ValueError(f"{type(traces)} is an invalid type for add_trace")
 
     @add_traces.register
-    def _add_traces_(self, traces: BaseTraceType, *args: BaseTraceType) -> None:
-        self._add_traces(traces=itertools.chain((traces,), args))
+    def _add_traces_(self, traces: BaseTraceType, *args: BaseTraceType, group: str | None = None) -> None:
+        self._add_traces(traces=itertools.chain((traces,), args), group=group)
 
     @add_traces.register(Iterable)
-    def _add_traces_(self, traces: Iterable[BaseTraceType], *args: BaseTraceType) -> None:
-        self._add_traces(traces=itertools.chain(traces, args))
+    def _add_traces_(self, traces: Iterable[BaseTraceType], *args: BaseTraceType, group: str | None = None) -> None:
+        self._add_traces(traces=itertools.chain(traces, args), group=group)
 
     def update_traces(self, dict1: dict[str, Any] = None, overwrite: bool = False, **kwargs: Any) -> None:
         for trace in self._traces:
@@ -465,30 +573,34 @@ class BasePlot(BaseObject):
         if not isinstance(plots, BasePlot):
             raise ValueError(f"{type(plots)} is an invalid type for group_same_legend")
 
+        self._group_existing_legend = True
         for trace in self._traces:
             trace.legendgroup = trace.name
 
         for plot in itertools.chain((plots,), args):
+            plot._group_existing_legend = True
             for trace in plot._traces:
                 trace.legendgroup = trace.name
                 trace.showlegend = False
 
     @group_same_legend_items.register(Iterable)
     def _group_same_legend_items(self, plots: Iterable["BasePlot"], *args: "BasePlot") -> None:
+        self._group_existing_legend = True
         for trace in self._traces:
             trace.legendgroup = trace.name
 
         for plot in itertools.chain(plots, args):
+            plot._group_existing_legend = True
             for trace in plot._traces:
                 trace.legendgroup = trace.name
                 trace.showlegend = False
 
     # Data Generation
     def generate_x(self, n_samples: int) -> tuple | np.ndarray:
-        return tuple(range(n_samples))
+        return tuple(range(n_samples)) if self.x is None else np.squeeze(self.x)
 
     def generate_y(self, n_samples: int) -> tuple | np.ndarray:
-        return tuple(range(n_samples))
+        return tuple(range(n_samples)) if self.y is None else np.squeeze(self.y)
 
     def generate_z(self, n_samples: int) -> tuple | np.ndarray:
         return tuple(range(0, n_samples))
@@ -496,16 +608,20 @@ class BasePlot(BaseObject):
     def generate_labels(self, n_labels: int) -> Iterable[str]:
         if self._labels is None:
             return [f"Channel {i}" for i in range(1, n_labels + 1)]
+        elif self._label_index:
+            return [f"[Index {i + 1}] {label}" for i, label in enumerate(self._labels)]
         else:
             return self._labels
 
     def generate_names(self, names: Iterable[str] | None = None, n_names: int | None = None) -> list[str]:
-        if names is not None:
-            return [f"[Index {i + 1}] {name}" for i, name in enumerate(names)] if self._label_index else names
+        if self._names is not None:
+            return [f"[Index {i + 1}] {name}" for i, name in enumerate(names)] if self._label_index else self._names
+        elif names is not None:
+            return [f"[Set {i + 1}] {name}" for i, name in enumerate(names)] if self._label_index else names
         elif self._label_index:
-            return [f"[Index {i + 1}] Channel {i + 1}" for i in range(n_names)]
+            return [f"[Set {i + 1}] Bar Set {i + 1}" for i in range(n_names)]
         else:
-            return [f"Channel {i + 1}" for i in range(n_names)]
+            return [f"Set {i + 1}" for i in range(n_names)]
 
     def generate_tick_labels(self, labels: Iterable[str]) -> list[str]:
         # Apply Index to Labels
@@ -518,3 +634,7 @@ class BasePlot(BaseObject):
             tick_labels = labels
 
         return tick_labels
+
+    # Plotting
+    def update_plot(self,**kwargs):
+        pass
