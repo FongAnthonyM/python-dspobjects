@@ -12,8 +12,10 @@ __email__ = __email__
 
 # Imports #
 # Standard Libraries #
+from typing import Any
 
 # Third-Party Packages #
+import numpy as np
 
 # Local Packages #
 from .seriesplot import SeriesPlot
