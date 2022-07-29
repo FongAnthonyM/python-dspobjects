@@ -89,12 +89,21 @@ class Subplot(BaseObject):
     def update_yaxis(self, dict1=None, overwrite=False, **kwargs) -> None:
         self.yaxis.update(dict1=dict1, overwrite=overwrite, **kwargs)
 
-    def add_trace(self, trace, secondary_y=None, exclude_empty_subplots=False):
-        self.figure.add_trace(
-            trace,
-            row=self.row,
-            col=self.col,
-            secondary_y=secondary_y,
-            exclude_empty_subplots=exclude_empty_subplots,
-        )
-        return self.figure.data[-1]
+    def add_trace(self, trace, secondary_y=None, exclude_empty_subplots=False, traces=None):
+        if traces is not None:
+            return traces.append_trace(
+                trace,
+                row=self.row,
+                col=self.col,
+                secondary_y=secondary_y,
+                exclude_empty_subplots=exclude_empty_subplots,
+            )
+        else:
+            self.figure.add_trace(
+                trace,
+                row=self.row,
+                col=self.col,
+                secondary_y=secondary_y,
+                exclude_empty_subplots=exclude_empty_subplots,
+            )
+            return self.figure.data[-1]

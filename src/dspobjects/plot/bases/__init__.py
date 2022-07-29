@@ -14,6 +14,7 @@ __email__ = __email__
 # Imports #
 # Local Packages #
 from .subplot import Subplot
+from .tracecontainer import TraceContainer
 from .figure import Figure
 from .baseplot import BasePlot
 from .plotgroup import PlotGroup, PlotOrKey, XAssignments, YAssignments

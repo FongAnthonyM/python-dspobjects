@@ -1,8 +1,8 @@
-""" timespectragroup.py
+""" rocpercisionrecallgroup.py
 
 """
 # Package Header #
-from ...header import *
+from ....header import *
 
 # Header #
 __author__ = __author__
@@ -19,14 +19,14 @@ from typing import Any
 # Third-Party Packages #
 
 # Local Packages #
-from ..bases import BasePlot, PlotGroup, YAssignments
-from .timeseriesplot import TimeSeriesPlot
-from .spectraplot import SpectraPlot
+from ...bases import BasePlot, PlotGroup
+from .rocplot import ROCPlot
+from .precisionrecallplot import PrecisionRecallPlot
 
 
 # Definitions #
 # Classes #
-class TimeSpectraGroup(PlotGroup):
+class ROCPrecisionRecallGroup(PlotGroup):
     """
 
     Class Attributes:
@@ -50,12 +50,7 @@ class TimeSpectraGroup(PlotGroup):
                      'eraseshape'
                      ],
     )
-    default_subplot_settings: dict[str, Any] = dict(rows=1, cols=2, horizontal_spacing=0.01)
-    default_plots: Mapping[str, BasePlot | PlotGroup] = dict(timeseries=TimeSeriesPlot, spectra=SpectraPlot)
-    default_locations: dict[str, tuple[int, int]] = dict(timeseries=(0,0), spectra=(0,1))
-    default_plot_settings: dict[str, dict[str, Any]] = dict(
-        timeseries=dict(title=dict(text="Time Series")),
-        spectra=dict(title=dict(text="Spectra")),
-    )
-    default_yaxes_assignment: YAssignments = (("spectra", "timeseries"),)
+    default_subplot_settings: dict[str, Any] = dict(rows=1, cols=2, horizontal_spacing=0.05)
+    default_plots: Mapping[str, BasePlot | PlotGroup] = dict(roc=ROCPlot, precisionrecall=PrecisionRecallPlot)
+    default_locations: dict[str, tuple[int, int]] = dict(roc=(0, 0), precisionrecall=(0, 1))
     default_legend_group = "all"

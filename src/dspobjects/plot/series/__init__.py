@@ -14,7 +14,7 @@ __email__ = __email__
 # Imports #
 # Local Packages #
 from .seriesplot import SeriesPlot
-from .timeseriesplot import TimeSeriesPlot
-from .spectraplot import SpectraPlot
-#from .precisonrecallplot import PrecisionRecallPlot
-from .timespectragroup import TimeSpectraGroup
+from .stackedseriesplot import StackedSeriesPlot
+from .zeroonedomainplot import ZeroOneDomainPlot
+from .timefreqeuncyplots import *
+from .performanceplots import *

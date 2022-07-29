@@ -15,6 +15,7 @@ __email__ = __email__
 # Standard Libraries #
 from collections.abc import Iterable
 from typing import Any
+import itertools
 
 # Third-Party Packages #
 from plotly.basedatatypes import BaseTraceType
@@ -59,7 +60,6 @@ class SeriesPlot(BasePlot):
         line={"width": 1},
         showlegend=True,
     )
-    default_hovertemplate: str | None = None
 
     # Magic Methods #
     # Construction/Destruction
@@ -147,7 +147,7 @@ class SeriesPlot(BasePlot):
         z_score: bool | None = None,
         **kwargs: Any,
     ) -> None:
-        self._update_attributes(
+        super().build(
             x=x,
             y=y,
             labels=labels,
@@ -161,7 +161,7 @@ class SeriesPlot(BasePlot):
         if self.y is not None:
             self.update_plot()
 
-    # Traces
+    # TraceContainer
     def set_trace_color(self, trace: int | BaseTraceType, color: str) -> None:
         if isinstance(trace, int):
             trace = self._traces[trace]
@@ -175,10 +175,18 @@ class SeriesPlot(BasePlot):
         else:
             y_mod = self.y
 
-        # Apply Data to Traces
-        trace_iter = iter(self._trace_groups["data"])
-        trace_data = zip(iterdim(self.y, self._c_axis), iterdim(y_mod, self._c_axis), trace_iter)
-        for i, (channel, plot_c, trace) in enumerate(trace_data):
+        # Apply Data to TraceContainer
+        if self._text is not None:
+            if self.text.shape[self._c_axis] == 1:
+                text_iter = itertools.repeat(np.squeeze(self._text), self.y.shape[self._c_axis])
+            else:
+                text_iter = iterdim(self._text, self._c_axis)
+        else:
+            text_iter = iterdim(y_mod, self._c_axis)
+
+        trace_iter = iter(self._traces["data"])
+        trace_data = zip(iterdim(self.y, self._c_axis), text_iter, trace_iter)
+        for i, (text, plot_c, trace) in enumerate(trace_data):
             trace.x = x
             trace.y = plot_c + (i * self._trace_offset)
             trace.name = names[i]
@@ -186,10 +194,11 @@ class SeriesPlot(BasePlot):
                 trace.legendgroup = names[i]
             if names[i] in existing_legend_group:
                 trace.showlegend = False
-            trace.text = [f"{c:.4f}" for c in channel]
+            if self.z_score:
+                trace.text = [f"{c:.4f}" for c in text]
             trace.visible = True
 
-        # Turn Off Unused Traces
+        # Turn Off Unused TraceContainer
         for trace in trace_iter:
             trace.x = None
             trace.y = None
@@ -218,16 +227,16 @@ class SeriesPlot(BasePlot):
         )
         # Handle Legend Groups
         if self._group_existing_legend:
-            existing_group = self._figure.get_legendgroups()
+            existing_legend_group = self._figure.get_legendgroups()
         else:
-            existing_group = {}
+            existing_legend_group = {}
 
         # Data Info
         n_samples = self.y.shape[self._axis]
         n_channels = self.y.shape[self._c_axis]
-        n_additions = n_channels - len(self._traces_groups["data"])
+        n_additions = n_channels - len(self._traces["data"])
 
-        # Create New Traces
+        # Create New TraceContainer
         default_trace = go.Scattergl()
         self.add_traces((default_trace,)*n_additions, group="data")
 
@@ -272,9 +281,9 @@ class SeriesPlot(BasePlot):
         # Data Info
         n_samples = self.y.shape[self._axis]
         n_channels = self.y.shape[self._c_axis]
-        n_additions = n_channels - len(self._trace_groups["data"])
+        n_additions = n_channels - len(self._traces["data"])
 
-        # Create New Traces
+        # Create New TraceContainer
         default_trace = go.Scattergl()
         self.add_traces((default_trace,)*n_additions, group="data")
 
@@ -291,7 +300,10 @@ class SeriesPlot(BasePlot):
         self._update_data(x=x, names=names, existing_legend_group=existing_legend_group)
 
         # Apply Labels and Range
-        y_axis = dict(range=[-1 * self._trace_offset, n_channels * self._trace_offset])
+        y_axis = dict()
+
+        if self.yaxis.range is None:
+            y_axis["range"] = [-1 * self._trace_offset, n_channels * self._trace_offset]
 
         if self._label_axis:
             y_axis["tickvals"] = np.arange(n_channels) * self._trace_offset
@@ -300,7 +312,12 @@ class SeriesPlot(BasePlot):
         self.update_yaxis(y_axis)
 
         # Apply Range and Slider
-        self.update_xaxis(dict(
-            range=[x[0], x[-1]],
-            rangeslider=dict(range=[float(x[0]), float(x[-1])]),
-        ))
+        x_axis = dict()
+
+        if self.xaxis.range is None:
+            x_axis["range"] = dict(range=[x[0], x[-1]])
+
+        if self.xaxis.rangeslider.visible:
+            x_axis["rangeslider"] = dict(range=[float(x[0]), float(x[-1])])
+
+        self.update_xaxis(x_axis)

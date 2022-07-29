@@ -22,7 +22,6 @@ from plotly.basedatatypes import BaseTraceType
 import plotly.graph_objects as go
 
 # Local Packages #
-from ...operations import iterdim
 from ..bases import Subplot, BasePlot
 
 
@@ -43,11 +42,6 @@ class HeatmapPlot(BasePlot):
                                          "%{x:.4f} %{_x_unit}")
     default_color_sequence: list | None = None
 
-    # Magic Methods #
-    # Construction/Destruction
-
-
-
     # Instance Methods #
     # Constructors/Destructors
     def build(
@@ -58,7 +52,7 @@ class HeatmapPlot(BasePlot):
         labels: list | None = None,
         **kwargs: Any,
     ) -> None:
-        self._update_attributes(
+        super().build(
             x=x,
             y=y,
             z=z,
@@ -90,17 +84,11 @@ class HeatmapPlot(BasePlot):
             labels=labels,
             **kwargs,
         )
-        # Handle Legend Groups
-        if self._group_existing_legend:
-            existing_group = self._figure.get_legendgroups()
-        else:
-            existing_group = {}
-
-        if len(self._trace_groups["data"]) < 1:
+        if len(self._traces["data"]) < 1:
             default_trace = go.Heatmap()
             self.add_traces((default_trace,), group="data")
 
-        trace_iter = iter(self._trace_groups["data"])
+        trace_iter = iter(self._traces["data"])
         trace = next(trace_iter)
 
         trace.update(dict(

@@ -19,6 +19,7 @@ import plotly.graph_objects as go
 
 # Local Packages #
 from .subplot import Subplot
+from .tracecontainer import TraceContainer
 
 
 # Definitions #
@@ -37,10 +38,15 @@ class Figure(go.Figure):
     # Construction/Destruction
     def __init__(self, data=None, layout=None, frames=None, skip_invalid=False, figure=None, **kwargs) -> None:
         # New Attributes #
+        self._traces: TraceContainer = TraceContainer(figure=self)
         self._subplots: list[Subplot] = []
 
         # Object Construction #
         self.construct(data=data, layout=layout, frames=frames, skip_invalid=skip_invalid, figure=figure, **kwargs)
+
+    @property
+    def traces(self):
+        return self._traces
 
     @property
     def subplots(self):
@@ -68,12 +74,29 @@ class Figure(go.Figure):
 
         return self
 
+    def create_trace_group(self, name: str):
+        return self.traces.create_group(name=name)
+
+    def require_trace_group(self, name: str):
+        return self.traces.require_group(name=name)
+
     def get_legendgroups(self):
         return set(trace.legendgroup for trace in self.data if trace.legendgroup is not None)
 
+    def to_dict(self):
+        self.data = self._traces.as_flat_tuple()
+        return super().to_dict()
+
+    def to_ordered_dict(self, skip_uid=True):
+        self.data = self._traces.as_flat_tuple()
+        return super().to_ordered_dict(skip_uid=skip_uid)
+
     def to_image(self, *args, rangeslider_visible=False, **kwargs):
+        self.data = self._traces.as_flat_tuple()
 
         if not rangeslider_visible:
             self.update_xaxes(dict(rangeslider={"visible": False}))
 
         super().to_image(*args, *kwargs)
+
+

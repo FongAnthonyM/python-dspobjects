@@ -28,6 +28,7 @@ import plotly.express as px
 
 # Local Packages #
 from .subplot import Subplot
+from .tracecontainer import TraceContainer
 from .figure import Figure
 
 
@@ -54,12 +55,14 @@ class BasePlot(BaseObject):
     default_title_settings: dict[str, Any] = dict()
     default_xaxis_settings: dict[str, Any] = dict()
     default_yaxis_settings: dict[str, Any] = dict()
+    default_static_trace_settings: dict[str, Any] = dict(showlegend=False)
     default_trace_settings: dict[str, Any] = dict()
     default_hovertemplate: str | None = None
     default_color_sequence: Iterable[str] | str | None = px.colors.qualitative.Plotly
     default_x_unit: str = ""
     default_y_unit: str = ""
     default_z_unit: str = ""
+    default_static_traces: dict[str, BaseTraceType] = {}
 
     # Magic Methods #
     # Construction/Destruction
@@ -71,6 +74,7 @@ class BasePlot(BaseObject):
         x: np.ndarray | None = None,
         y: np.ndarray | None = None,
         z: np.ndarray | None = None,
+        text: Iterable[str] | None = None,
         labels: list | None = None,
         label_axis: bool = False,
         label_index: bool = True,
@@ -83,6 +87,8 @@ class BasePlot(BaseObject):
         title: dict[str, Any] | None = None,
         xaxis: dict[str, Any] | None = None,
         yaxis: dict[str, Any] | None = None,
+        static_traces: dict[str, BaseTraceType] | None = None,
+        static_trace_settings: dict[str, Any] | None = None,
         build: bool = True,
         init: bool = True,
     ) -> None:
@@ -91,13 +97,15 @@ class BasePlot(BaseObject):
         self._layout_settings: dict[str, Any] = self.default_layout_settings.copy()
         self._trace_settings_: dict[str, Any] = self.default_trace_settings.copy()
         self._hovertemplate_: str | None = self.default_hovertemplate
+        self._static_trace_settings: dict[str, Any] = self.default_static_trace_settings.copy()
+        self._static_traces: dict[str, BaseTraceType] = self.default_static_traces.copy()
         self._group_existing_legend: bool = False
 
         self._color_sequence: list | None = None
         self._color_cycle: Iterator | None = None
 
         self._name: str = ""
-        self._names: Iterable[str | None] = None
+        self._names: Iterable[str] | None = None
         self._trace_offset: float = 5.0
 
         self._axis: int = 0
@@ -121,11 +129,11 @@ class BasePlot(BaseObject):
         self._x: np.ndarray | None = None
         self._y: np.ndarray | None = None
         self._z: np.ndarray | None = None
+        self._text: np.ndarray | None = None
 
         self._labels: Iterable[str] | None = None
 
-        self._trace_groups: dict[str, Iterable[BaseTraceType]] = {"static": [], "data": []}
-        self._traces: list[BaseTraceType] = []
+        self._traces: TraceContainer | None = None
 
         # Object Construction #
         if self.default_color_sequence is not None:
@@ -140,6 +148,7 @@ class BasePlot(BaseObject):
                 x=x,
                 y=y,
                 z=z,
+                text=text,
                 labels=labels,
                 label_axis=label_axis,
                 label_index=label_index,
@@ -152,6 +161,8 @@ class BasePlot(BaseObject):
                 title=title,
                 xaxis=xaxis,
                 yaxis=yaxis,
+                static_traces=static_traces,
+                static_trace_settings=static_trace_settings,
                 build=build,
             )
 
@@ -287,6 +298,19 @@ class BasePlot(BaseObject):
             self._z = value
 
     @property
+    def text(self) -> np.ndarray | None:
+        return self._text
+
+    @text.setter
+    def text(self, value) -> None:
+        if value is None:
+            self._text = None
+        else:
+            value = value if isinstance(value, np.ndarray) else np.array(value)
+            value = value if value.ndim > 1 else np.expand_dims(value, 1)
+            self._text = value
+
+    @property
     def labels(self) -> Iterable[str]:
         return copy.copy(self._labels)
 
@@ -312,11 +336,11 @@ class BasePlot(BaseObject):
         x: np.ndarray | None = None,
         y: np.ndarray | None = None,
         z: np.ndarray | None = None,
+        text: Iterable[str] | None = None,
         labels: list | None = None,
         label_axis: bool | None = None,
         label_index: bool | None = None,
         tick_index_only: bool | None = None,
-        names: list | None = None,
         axis: int | None = None,
         c_axis: int | None = None,
         t_offset: float | None = None,
@@ -324,6 +348,8 @@ class BasePlot(BaseObject):
         title: dict[str, Any] | None = None,
         xaxis: dict[str, Any] | None = None,
         yaxis: dict[str, Any] | None = None,
+        static_traces: dict[str, BaseTraceType] | None = None,
+        static_trace_settings: dict[str, Any] | None = None,
         build: bool = True,
         **kwargs: Any,
     ) -> None:
@@ -334,6 +360,7 @@ class BasePlot(BaseObject):
             x=x,
             y=y,
             z=z,
+            text=text,
             labels=labels,
             label_axis=label_axis,
             label_index=label_index,
@@ -342,6 +369,8 @@ class BasePlot(BaseObject):
             c_axis=c_axis,
             t_offset=t_offset,
             trace_settings=trace_settings,
+            static_traces=static_traces,
+            static_trace_settings=static_trace_settings,
             **kwargs,
         )
 
@@ -364,6 +393,7 @@ class BasePlot(BaseObject):
         x: np.ndarray | None = None,
         y: np.ndarray | None = None,
         z: np.ndarray | None = None,
+        text: Iterable[str] | None = None,
         labels: list | None = None,
         label_axis: bool | None = None,
         label_index: bool | None = None,
@@ -373,6 +403,8 @@ class BasePlot(BaseObject):
         c_axis: int | None = None,
         t_offset: float | None = None,
         trace_settings: dict[str, Any] | None = None,
+        static_traces: dict[str, BaseTraceType] | None = None,
+        static_trace_settings: dict[str, Any] | None = None,
         **kwargs: Any,
     ) -> None:
         if figure is not None and subplot is not None:
@@ -389,6 +421,11 @@ class BasePlot(BaseObject):
             self._subplot = subplot
             self._figure = subplot.figure
 
+        if self._traces is None:
+            self._traces = self._figure.create_trace_group(str(id(self)))
+            self._traces.require_group("static")
+            self._traces.require_group("data")
+
         if name is not None:
             self._name = name
 
@@ -403,6 +440,9 @@ class BasePlot(BaseObject):
 
         if z is not None:
             self.z = z
+
+        if text is not None:
+            self.text = text
 
         if labels is not None:
             self._labels = labels
@@ -428,40 +468,20 @@ class BasePlot(BaseObject):
         if trace_settings is not None:
             self._trace_settings_.update(trace_settings)
 
-    def build(
-        self,
-        figure: Figure | None = None,
-        subplot: Subplot | None = None,
-        name: str | None = None,
-        x: np.ndarray | None = None,
-        y: np.ndarray | None = None,
-        z: np.ndarray | None = None,
-        labels: list | None = None,
-        label_axis: bool | None = None,
-        label_index: bool | None = None,
-        tick_index_only: bool | None = None,
-        names: list | None = None,
-        axis: int | None = None,
-        c_axis: int | None = None,
-        t_offset: float | None = None,
-        **kwargs: Any,
-    ) -> None:
-        self._update_attributes(
-            figure=figure,
-            subplot=subplot,
-            name=name,
-            x=x,
-            y=y,
-            z=z,
-            labels=labels,
-            label_axis=label_axis,
-            label_index=label_index,
-            tick_index_only=tick_index_only,
-            axis=axis,
-            c_axis=c_axis,
-            t_offset=t_offset,
-            **kwargs,
-        )
+        if static_traces is not None:
+            self._static_traces.update(static_traces)
+
+        if static_trace_settings is not None:
+            self._static_trace_settings.update(static_trace_settings)
+
+    def build(self, *args: Any, **kwargs: Any) -> None:
+        self._update_attributes(*args, **kwargs,)
+        self.build_static_traces()
+
+    def build_static_traces(self, static_traces: dict[str, BaseTraceType] | None = None, **kwargs: Any) -> None:
+        if static_traces is not None:
+            self._static_traces.update(static_traces)
+        self.add_static_traces(self._static_traces)
 
     # Subplot and Axes
     def _set_subplot(self, row: int, col: int):
@@ -517,15 +537,17 @@ class BasePlot(BaseObject):
         else:
             self._figure.layout.yaxis.update(dict1=dict1, overwrite=overwrite, **kwargs)
 
-    # Traces
+    # TraceContainer
     @abstractmethod
     def set_trace_color(self, trace: int | BaseTraceType, color: str) -> None:
         if isinstance(trace, int):
             trace = self._traces[trace]
 
-    def _add_traces(self, traces: Iterable[BaseTraceType], group: str | None = None) -> None:
-        if group is not None and group not in self._trace_groups:
-            self._trace_groups[group] = []
+    def _add_traces(self, traces: Iterable[BaseTraceType], group: str | Iterable[str] | None = None) -> None:
+        if group is not None:
+            contained_traces = self._traces.require_group(group)
+        else:
+            contained_traces = self._traces
 
         # Trace Settings
         trace_defaults = self._trace_settings.copy()
@@ -537,34 +559,46 @@ class BasePlot(BaseObject):
 
         for trace in traces:
             if self._subplot is not None:
-                new_trace = self._subplot.add_trace(trace)
+                new_trace = self._subplot.add_trace(trace, traces=contained_traces)
             else:
-                self._figure.add_trace(trace)
-                new_trace = self._figure.data[-1]
+                new_trace = contained_traces.append_trace(trace)
 
             new_trace.update(trace_defaults)
 
             if self._color_sequence is not None:
                 self.set_trace_color(new_trace, next(self._color_cycle))
 
-            self._traces.append(new_trace)
-            if group is not None:
-                self._trace_groups[group].append(new_trace)
-
     @singlekwargdispatchmethod("traces")
-    def add_traces(self, traces, *args: BaseTraceType, group: str | None = None) -> None:
+    def add_traces(self, traces, *args: BaseTraceType, group: str | Iterable[str] | None = None) -> None:
         raise ValueError(f"{type(traces)} is an invalid type for add_trace")
 
     @add_traces.register
-    def _add_traces_(self, traces: BaseTraceType, *args: BaseTraceType, group: str | None = None) -> None:
+    def _add_traces_(
+        self,
+        traces: BaseTraceType,
+        *args: BaseTraceType,
+        group: str | Iterable[str] | None = None,
+    ) -> None:
         self._add_traces(traces=itertools.chain((traces,), args), group=group)
 
     @add_traces.register(Iterable)
-    def _add_traces_(self, traces: Iterable[BaseTraceType], *args: BaseTraceType, group: str | None = None) -> None:
+    def _add_traces_(
+        self,
+        traces: Iterable[BaseTraceType],
+        *args: BaseTraceType,
+        group: str | Iterable[str] | None = None,
+    ) -> None:
         self._add_traces(traces=itertools.chain(traces, args), group=group)
 
-    def update_traces(self, dict1: dict[str, Any] = None, overwrite: bool = False, **kwargs: Any) -> None:
-        for trace in self._traces:
+    def update_traces(
+        self,
+        dict1: dict[str, Any] = None,
+        overwrite: bool = False,
+        trace_group: str | Iterable[str] | None = None,
+        **kwargs: Any,
+    ) -> None:
+        traces = self._traces if trace_group is None else self._traces.get_group(trace_group)
+        for trace in traces:
             trace.update(dict1=dict1, overwrite=overwrite, **kwargs)
 
     # Trace/Legend
@@ -636,5 +670,45 @@ class BasePlot(BaseObject):
         return tick_labels
 
     # Plotting
-    def update_plot(self,**kwargs):
+    def add_static_trace(self, name: str, trace: BaseTraceType) -> None:
+        # Trace Settings
+        trace_defaults = self._static_trace_settings.copy()
+        if self._xaxis is not None:
+            trace_defaults["xaxis"] = self._xaxis.plotly_name.replace("axis", '')
+
+        if self._yaxis is not None:
+            trace_defaults["yaxis"] = self._yaxis.plotly_name.replace("axis", '')
+
+        trace_group = self._traces["static"].create_group(name)
+        if self._subplot is not None:
+            new_trace = self._subplot.add_trace(trace, traces=trace_group)
+        else:
+            new_trace = trace_group.append_trace(trace)
+        new_trace.update(trace_defaults)
+
+    def add_static_traces(self, dict_: dict[str, BaseTraceType]) -> None:
+        # Trace Settings
+        trace_defaults = self._static_trace_settings.copy()
+        if self._xaxis is not None:
+            trace_defaults["xaxis"] = self._xaxis.plotly_name.replace("axis", '')
+
+        if self._yaxis is not None:
+            trace_defaults["yaxis"] = self._yaxis.plotly_name.replace("axis", '')
+
+        for name, trace in dict_.items():
+            trace_group = self._traces["static"].create_group(name)
+            if self._subplot is not None:
+                new_trace = self._subplot.add_trace(trace, traces=trace_group)
+            else:
+                new_trace = trace_group.append_trace(trace)
+            new_trace.update(trace_defaults)
+
+    def update_static_trace(self, name: str, dict_: dict[str, Any]) -> None:
+        self._traces["static"][name][0].update(dict_)
+
+    def update_static_traces(self, dict_: dict[str, dict] | None) -> None:
+        for name, updates in dict_.items():
+            self._traces["static"][name][0].update(updates)
+
+    def update_plot(self, **kwargs):
         pass

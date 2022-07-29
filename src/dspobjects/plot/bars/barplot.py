@@ -145,7 +145,7 @@ class BarPlot(BasePlot):
         t_offset: float | None = None,
         **kwargs: Any,
     ) -> None:
-        self._update_attributes(
+        super().build(
             x=x,
             y=y,
             labels=labels,
@@ -163,7 +163,7 @@ class BarPlot(BasePlot):
             # Apply Data
             self.update_plot()
 
-    # Traces
+    # TraceContainer
     def set_trace_color(self, trace: int | BaseTraceType, color: str) -> None:
         if isinstance(trace, int):
             trace = self._traces[trace]
@@ -181,7 +181,7 @@ class BarPlot(BasePlot):
             existing_group = {}
 
         n_traces = data.shape[self._c_axis]
-        n_additions = n_traces - len(self._trace_groups["data"])
+        n_additions = n_traces - len(self._traces["data"])
 
         default_trace = go.Bar()
         self.add_traces((default_trace,) * n_additions, group="data")
@@ -286,7 +286,7 @@ class BarPlot(BasePlot):
         names = self.generate_names(n_names=n_sets)
         tick_labels = self.generate_tick_labels(labels=labels)
 
-        # Apply Data to Traces
+        # Apply Data to TraceContainer
         if self._separated_categories:
             self.apply_separate_bar_traces(data, locations, b_axis, l_axis, labels)
         else:
