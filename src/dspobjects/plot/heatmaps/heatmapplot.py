@@ -97,6 +97,8 @@ class HeatmapPlot(BasePlot):
             z=self.z,
         ))
 
+        # Todo: Figure out how to add text
+
         for trace in trace_iter:
             trace.x = None
             trace.y = None

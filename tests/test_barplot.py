@@ -45,7 +45,7 @@ class ClassTest(abc.ABC):
         pass
 
 
-class TestTimeSeriesPlot():
+class TestBarPlot():
 
     def generate_data(self, samples=10, channels=1):
         counts = np.random.randint(1, 100, size=(samples, channels))

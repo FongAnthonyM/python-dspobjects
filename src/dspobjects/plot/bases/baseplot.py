@@ -27,6 +27,7 @@ import plotly.graph_objects as go
 import plotly.express as px
 
 # Local Packages #
+from ...operations import iterdim
 from .subplot import Subplot
 from .tracecontainer import TraceContainer
 from .figure import Figure
@@ -106,7 +107,7 @@ class BasePlot(BaseObject):
 
         self._name: str = ""
         self._names: Iterable[str] | None = None
-        self._trace_offset: float = 5.0
+        self._trace_offset: float = 0
 
         self._axis: int = 0
         self._c_axis: int = 1
@@ -668,6 +669,16 @@ class BasePlot(BaseObject):
             tick_labels = labels
 
         return tick_labels
+
+    # Text
+    def text_iterator(self, channels: int):
+        if self._text is not None:
+            if self.text.shape[self._c_axis] == 1:
+                return itertools.repeat(np.squeeze(self._text), channels)
+            else:
+                return iterdim(self._text, self._c_axis)
+        else:
+            return itertools.repeat(None, channels)
 
     # Plotting
     def add_static_trace(self, name: str, trace: BaseTraceType) -> None:

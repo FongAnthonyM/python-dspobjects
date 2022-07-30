@@ -2,6 +2,8 @@
 
 """
 # Package Header #
+import itertools
+
 from ...header import *
 
 # Header #
@@ -48,7 +50,7 @@ class BarPlot(BasePlot):
         y: np.ndarray | None = None,
         labels: list | None = None,
         names: list | None = None,
-        orientation: str = 'h',
+        orientation: str = 'v',
         separated: bool = False,
         axis: int = 0,
         c_axis: int = 1,
@@ -186,9 +188,10 @@ class BarPlot(BasePlot):
         default_trace = go.Bar()
         self.add_traces((default_trace,) * n_additions, group="data")
 
-        trace_iter = iter(self._trace_groups["data"])
-        trace_data = zip(iterdim(data, self._c_axis), trace_iter)
-        for i, (bars, trace) in enumerate(trace_data):
+        text_iter = self.text_iterator(data.shape[self._c_axis])
+        trace_iter = iter(self._traces["data"])
+        trace_data = zip(text_iter, iterdim(data, self._c_axis), trace_iter)
+        for i, (text, bars, trace) in enumerate(trace_data):
             data = {l_axis: locations, b_axis: bars}
             trace.update(data)
             trace.name = names[i]
@@ -196,6 +199,7 @@ class BarPlot(BasePlot):
                 trace.legendgroup = names[i]
             if names[i] in existing_group:
                 trace.showlegend = False
+            trace.text = text
             trace.orientation = self._orientation
             trace.visible = True
 
@@ -204,7 +208,7 @@ class BarPlot(BasePlot):
             trace.y = None
             trace.visible = False
 
-    def apply_separate_bar_traces(self, data, locations, b_axis, l_axis, names):
+    def apply_separate_bar_traces(self, data: np.ndarray, locations, b_axis, l_axis, names):
         # Handle Legend Groups
         if self._group_existing_legend:
             existing_group = self._figure.get_legendgroups()
@@ -212,20 +216,24 @@ class BarPlot(BasePlot):
             existing_group = {}
 
         n_traces = len(data)
-        n_additions = n_traces - len(self._trace_groups["data"])
+        n_additions = n_traces - len(self._traces["data"])
 
         default_trace = go.Bar()
         self.add_traces((default_trace,) * n_additions, group="data")
 
-        trace_iter = iter(self._trace_groups["data"])
-        for g, bars in enumerate(iterdim(data, self._c_axis)):
-            for i, (bar, location, trace) in enumerate(zip(bars, locations, trace_iter)):
+        text_iter = self.text_iterator(data.shape[self._c_axis])
+        trace_iter = iter(self._traces["data"])
+        for g, (text_c, bars) in enumerate(zip(text_iter, iterdim(data, self._c_axis))):
+            if text_c is None:
+                text_c = itertools.repeat(None, len(bars))
+            for i, (text, bar, location, trace) in enumerate(zip(text_c, bars, locations, trace_iter)):
                 data = {l_axis: [location], b_axis: [bar]}
                 trace.update(data)
                 trace.name = names[i]
                 trace.legendgroup = trace.name
                 if g > 0 or names[i] in existing_group:
                     trace.showlegend = False
+                trace.text = text
                 trace.orientation = self._orientation
                 trace.visible = True
 
@@ -299,7 +307,7 @@ class BarPlot(BasePlot):
             ticktext=tick_labels,
         )
 
-        if orientation == 'v':
+        if self._orientation == 'v':
             self.update_xaxis(tick_info)
         else:
             self.update_yaxis(tick_info)

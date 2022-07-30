@@ -161,6 +161,17 @@ class SeriesPlot(BasePlot):
         if self.y is not None:
             self.update_plot()
 
+    def text_iterator(self, channels: int):
+        if self._text is not None:
+            if self.text.shape[self._c_axis] == 1:
+                return itertools.repeat(np.squeeze(self._text), channels)
+            else:
+                return iterdim(self._text, self._c_axis)
+        elif self._z_score:
+            return (tuple(f"{v:.4f}" for v in c) for c in iterdim(self.y, self._c_axis))
+        else:
+            return itertools.repeat(None, channels)
+
     # TraceContainer
     def set_trace_color(self, trace: int | BaseTraceType, color: str) -> None:
         if isinstance(trace, int):
@@ -176,17 +187,10 @@ class SeriesPlot(BasePlot):
             y_mod = self.y
 
         # Apply Data to TraceContainer
-        if self._text is not None:
-            if self.text.shape[self._c_axis] == 1:
-                text_iter = itertools.repeat(np.squeeze(self._text), self.y.shape[self._c_axis])
-            else:
-                text_iter = iterdim(self._text, self._c_axis)
-        else:
-            text_iter = iterdim(y_mod, self._c_axis)
-
+        text_iter = self.text_iterator(self.y.shape[self._c_axis])
         trace_iter = iter(self._traces["data"])
-        trace_data = zip(iterdim(self.y, self._c_axis), text_iter, trace_iter)
-        for i, (text, plot_c, trace) in enumerate(trace_data):
+        trace_data = zip(text_iter, iterdim(y_mod, self._c_axis), trace_iter)
+        for i, (text_c, plot_c, trace) in enumerate(trace_data):
             trace.x = x
             trace.y = plot_c + (i * self._trace_offset)
             trace.name = names[i]
@@ -194,8 +198,7 @@ class SeriesPlot(BasePlot):
                 trace.legendgroup = names[i]
             if names[i] in existing_legend_group:
                 trace.showlegend = False
-            if self.z_score:
-                trace.text = [f"{c:.4f}" for c in text]
+            trace.text = text_c
             trace.visible = True
 
         # Turn Off Unused TraceContainer
@@ -315,7 +318,7 @@ class SeriesPlot(BasePlot):
         x_axis = dict()
 
         if self.xaxis.range is None:
-            x_axis["range"] = dict(range=[x[0], x[-1]])
+            x_axis["range"] = [x[0], x[-1]]
 
         if self.xaxis.rangeslider.visible:
             x_axis["rangeslider"] = dict(range=[float(x[0]), float(x[-1])])

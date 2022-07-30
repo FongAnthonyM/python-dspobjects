@@ -31,6 +31,7 @@ PlotOrKey = Union[BasePlot, str, Iterable[str]]
 XAssignments = Iterable[Iterable[PlotOrKey, PlotOrKey | go.layout.XAxis]]
 YAssignments = Iterable[Iterable[PlotOrKey, PlotOrKey | go.layout.YAxis]]
 
+
 # Classes #
 class PlotGroup(BaseDict):
     """
@@ -134,7 +135,6 @@ class PlotGroup(BaseDict):
         else:
             self.group_same_lengend_items(plots=self.default_legend_group)
 
-
     def get_subplots(self) -> dict[str: Subplot | dict]:
         subplots = {}
         for name, plot in self.data.items():
@@ -185,7 +185,6 @@ class PlotGroup(BaseDict):
                 all_plots.extend(plot.get_all_plots())
 
         return tuple(all_plots)
-
 
     @singlekwargdispatchmethod("key")
     def get_plot(self, key: Iterable[str] | str) -> BasePlot:
