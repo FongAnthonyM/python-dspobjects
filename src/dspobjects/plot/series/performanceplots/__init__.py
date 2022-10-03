@@ -16,3 +16,4 @@ __email__ = __email__
 from .rocplot import ROCPlot
 from .precisionrecallplot import PrecisionRecallPlot
 from .rocpercisionrecallgroup import ROCPrecisionRecallGroup
+from .classifierpreformancegroup import ClassifierPerformanceGroup

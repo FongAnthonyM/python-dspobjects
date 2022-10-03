@@ -13,7 +13,7 @@ __email__ = __email__
 
 # Imports #
 # Standard Libraries #
-from collections.abc import Iterable
+from collections.abc import Iterable, Iterator, Sized
 from typing import Any
 import itertools
 
@@ -161,16 +161,18 @@ class SeriesPlot(BasePlot):
         if self.y is not None:
             self.update_plot()
 
-    def text_iterator(self, channels: int):
-        if self._text is not None:
-            if self.text.shape[self._c_axis] == 1:
-                return itertools.repeat(np.squeeze(self._text), channels)
+    def text_iterator(self, lengths: Iterable[int] | None = None) -> Iterator:
+        if self._text is None:
+            if self._z_score:
+                return (tuple(f"{v:.4f}" for v in c) for c in self.y_iterator(lengths=lengths))
             else:
-                return iterdim(self._text, self._c_axis)
-        elif self._z_score:
-            return (tuple(f"{v:.4f}" for v in c) for c in iterdim(self.y, self._c_axis))
+                return ([""] * length for length in lengths)
+        elif isinstance(self._text, np.ndarray):
+            return iterdim(self._text, self._c_axis)
+        elif isinstance(self._text, Sized) and len(self._text) == 1:
+            return itertools.repeat(self._text[0], len(lengths))
         else:
-            return itertools.repeat(None, channels)
+            return iter(self._text)
 
     # TraceContainer
     def set_trace_color(self, trace: int | BaseTraceType, color: str) -> None:
@@ -179,20 +181,30 @@ class SeriesPlot(BasePlot):
 
         trace.update(line=dict(color=color))
 
-    def _update_data(self, x, names, existing_legend_group) -> None:
+    def _update_data(self, lengths, labels) -> None:
+        # Handle Legend Groups
+        if self._group_existing_legend:
+            existing_legend_group = self._figure.get_legendgroups()
+        else:
+            existing_legend_group = {}
+
+        # Trace Names
+        names = self.generate_names(names=labels)
+
         # Z Score Y Data
         if self.z_score:
-            y_mod = (self.y - np.nanmean(self.y, axis=self._axis)) / np.nanstd(self.y, axis=self._axis)
+            y_iter = (((y_c - np.nanmean(y_c)) / np.nanstd(y_c)) for y_c in self.y_iterator(lengths=lengths))
         else:
-            y_mod = self.y
+            y_iter = self.y_iterator(lengths=lengths)
 
         # Apply Data to TraceContainer
-        text_iter = self.text_iterator(self.y.shape[self._c_axis])
+        x_iter = self.x_iterator(lengths=lengths)
+        text_iter = self.text_iterator(lengths=lengths)
         trace_iter = iter(self._traces["data"])
-        trace_data = zip(text_iter, iterdim(y_mod, self._c_axis), trace_iter)
-        for i, (text_c, plot_c, trace) in enumerate(trace_data):
-            trace.x = x
-            trace.y = plot_c + (i * self._trace_offset)
+        trace_data = zip(x_iter, y_iter, text_iter, trace_iter)
+        for i, (x_c, y_c, text_c, trace) in enumerate(trace_data):
+            trace.x = x_c
+            trace.y = y_c + (i * self._trace_offset)
             trace.name = names[i]
             if self._group_existing_legend:
                 trace.legendgroup = names[i]
@@ -228,15 +240,9 @@ class SeriesPlot(BasePlot):
             z_score=z_score,
             **kwargs,
         )
-        # Handle Legend Groups
-        if self._group_existing_legend:
-            existing_legend_group = self._figure.get_legendgroups()
-        else:
-            existing_legend_group = {}
-
         # Data Info
-        n_samples = self.y.shape[self._axis]
-        n_channels = self.y.shape[self._c_axis]
+        lengths = [len(y_c) for y_c in self.y_iterator()]
+        n_channels = len(lengths)
         n_additions = n_channels - len(self._traces["data"])
 
         # Create New TraceContainer
@@ -246,13 +252,8 @@ class SeriesPlot(BasePlot):
         # Generate Labels
         labels = self.generate_labels(n_labels=n_channels)
 
-        names = self.generate_names(names=labels)
-        tick_labels = self.generate_tick_labels(labels=labels)
-
         # Generate X Data
-        x = self.generate_x(n_samples=n_samples)
-
-        self._update_data(x=x, names=names, existing_legend_group=existing_legend_group)
+        self._update_data(lengths=lengths, labels=labels)
 
     def update_plot(
         self,
@@ -275,32 +276,20 @@ class SeriesPlot(BasePlot):
             z_score=z_score,
             **kwargs,
         )
-        # Handle Legend Groups
-        if self._group_existing_legend:
-            existing_legend_group = self._figure.get_legendgroups()
-        else:
-            existing_legend_group = {}
-
         # Data Info
-        n_samples = self.y.shape[self._axis]
-        n_channels = self.y.shape[self._c_axis]
+        lengths = [len(y_c) for y_c in self.y_iterator([1])]
+        n_channels = len(lengths)
         n_additions = n_channels - len(self._traces["data"])
 
         # Create New TraceContainer
         default_trace = go.Scattergl()
-        self.add_traces((default_trace,)*n_additions, group="data")
+        self.add_traces((default_trace,) * n_additions, group="data")
 
         # Generate Labels
         labels = self.generate_labels(n_labels=n_channels)
 
-        names = self.generate_names(names=labels)
-        tick_labels = self.generate_tick_labels(labels=labels)
-
         # Generate X Data
-        x = self.generate_x(n_samples=n_samples)
-
-        # Update Data
-        self._update_data(x=x, names=names, existing_legend_group=existing_legend_group)
+        self._update_data(lengths=lengths, labels=labels)
 
         # Apply Labels and Range
         y_axis = dict()
@@ -310,17 +299,20 @@ class SeriesPlot(BasePlot):
 
         if self._label_axis:
             y_axis["tickvals"] = np.arange(n_channels) * self._trace_offset
-            y_axis["ticktext"] = tick_labels
+            y_axis["ticktext"] = self.generate_tick_labels(labels=labels)
 
         self.update_yaxis(y_axis)
 
         # Apply Range and Slider
         x_axis = dict()
+        x_min = min([x_c.min() for x_c in self.x_iterator(lengths=lengths)])
+        x_max = max([x_c.max() for x_c in self.x_iterator(lengths=lengths)])
+        x_range = [x_min, x_max]
 
         if self.xaxis.range is None:
-            x_axis["range"] = [x[0], x[-1]]
+            x_axis["range"] = x_range
 
         if self.xaxis.rangeslider.visible:
-            x_axis["rangeslider"] = dict(range=[float(x[0]), float(x[-1])])
+            x_axis["rangeslider"] = dict(range=x_range)
 
         self.update_xaxis(x_axis)

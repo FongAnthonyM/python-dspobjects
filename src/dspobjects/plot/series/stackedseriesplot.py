@@ -45,6 +45,7 @@ class StackedSeriesPlot(SeriesPlot):
         autorange=True,
         fixedrange=True,
         rangeslider=dict(
+            visible=True,
             autorange=False,
             thickness=0.04,
             borderwidth=1,

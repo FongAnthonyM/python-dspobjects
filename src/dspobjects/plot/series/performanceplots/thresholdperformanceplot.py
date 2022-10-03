@@ -13,7 +13,7 @@ __email__ = __email__
 
 # Imports #
 # Standard Libraries #
-from collections.abc import Iterable
+from collections.abc import Iterable, Iterator, Sized
 from typing import Any
 import itertools
 
@@ -82,8 +82,14 @@ class ThresholdPerformancePlot(ZeroOneDomainPlot):
             )
 
     @property
-    def thresholds(self) -> np.ndarray | None:
+    def thresholds(self) -> Iterable | None:
         return self._thresholds
+
+    @thresholds.setter
+    def thresholds(self, value) -> None:
+        if isinstance(value, np.ndarray) and value.ndim == 1:
+            value = [value]
+        self._thresholds = value
 
     # Instance Methods #
     # Constructors/Destructors
@@ -107,19 +113,22 @@ class ThresholdPerformancePlot(ZeroOneDomainPlot):
         )
 
         if thresholds is not None:
-            if thresholds.shape != self.y.shape:
-                raise ValueError("thresholds must be the same size as data")
-            self._thresholds = thresholds
+            self.thresholds = thresholds
 
-    def text_iterator(self, channels: int):
-        if self._text is not None:
-            if self.text.shape[self._c_axis] == 1:
-                return itertools.repeat(np.squeeze(self._text), channels)
+    def threshold_iterator(self, lengths: Iterable[int] | None = None) -> Iterator:
+        return self._data_iterator(data=self.thresholds, lengths=lengths)
+
+    def text_iterator(self, lengths: Iterable[int] | None = None) -> Iterator:
+        if self._text is None:
+            if self._thresholds is not None:
+                return (tuple(f"{v:.4f}" for v in c) for c in self.threshold_iterator(lengths=lengths))
+            elif self._z_score:
+                return (tuple(f"{v:.4f}" for v in c) for c in self.y_iterator(lengths=lengths))
             else:
-                return iterdim(self._text, self._c_axis)
-        elif self._thresholds is not None:
-            return (tuple(f"{v:.4f}" for v in c) for c in iterdim(self._thresholds, self._c_axis))
-        elif self._z_score:
-            return (tuple(f"{v:.4f}" for v in c) for c in iterdim(self.y, self._c_axis))
+                return ([""] * length for length in lengths)
+        elif isinstance(self._text, np.ndarray):
+            return iterdim(self._text, self._c_axis)
+        elif isinstance(self._text, Sized) and len(self._text) == 1:
+            return itertools.repeat(self._text[0], len(lengths))
         else:
-            return itertools.repeat(None, channels)
+            return iter(self._text)

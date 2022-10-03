@@ -92,8 +92,8 @@ class HeatmapPlot(BasePlot):
         trace = next(trace_iter)
 
         trace.update(dict(
-            x=self.generate_x(self.z.shape[0]),
-            y=self.generate_y(self.z.shape[1]),
+            x=np.squeeze(self.generate_x(lengths=[self.z.shape[0]])),
+            y=np.squeeze(self.generate_y(lengths=[self.z.shape[1]])),
             z=self.z,
         ))
 

@@ -15,7 +15,7 @@ __email__ = __email__
 
 # Imports #
 # Standard Libraries #
-from collections.abc import Iterable
+from collections.abc import Iterable, Iterator, Mapping, Sized
 from typing import Any
 
 # Third-Party Packages #
@@ -171,27 +171,64 @@ class BarPlot(BasePlot):
             trace = self._traces[trace]
 
         trace.update(base=dict(color=color))
+    
+    def x_iterator(self, lengths: Iterable[int] | None = None) -> Iterator:
+        if self.x is None:
+            return (np.arange(length) * self._trace_offset for length in lengths)
+        elif isinstance(self.x, np.ndarray):
+            return iterdim(self.x, self._c_axis)
+        elif isinstance(self.x, Sized) and len(self.x) == 1:
+            return itertools.repeat(self.x[0], len(lengths))
+        else:
+            return iter(self.x)
 
-    def generate_locations(self, n_locations: int):
-        return np.arange(n_locations) * self._trace_offset
+    def generate_x(self, lengths: Iterable[int] | None = None) -> Iterable:
+        if self.x is None:
+            return [np.arange(length) * self._trace_offset for length in lengths]
+        elif isinstance(self.x, np.ndarray):
+            return self.x
+        elif isinstance(self.x, Sized) and len(self.x) == 1:
+            return self.x * len(lengths)
+        else:
+            return self.x
 
-    def apply_single_bar_traces(self, data, locations, b_axis, l_axis, names):
+    def y_iterator(self, lengths: Iterable[int] | None = None) -> Iterator:
+        if self.y is None:
+            return (np.arange(length) * self._trace_offset for length in lengths)
+        elif isinstance(self.y, np.ndarray):
+            return iterdim(self.y, self._c_axis)
+        elif isinstance(self.y, Sized) and len(self.y) == 1:
+            return itertools.repeat(self.y[0], len(lengths))
+        else:
+            return iter(self.y)
+
+    def generate_y(self, lengths: Iterable[int] | None = None) -> Iterable:
+        if self.y is None:
+            return [np.arange(length) * self._trace_offset for length in lengths]
+        elif isinstance(self.y, np.ndarray):
+            return self.y
+        elif isinstance(self.y, Sized) and len(self.y) == 1:
+            return self.y * len(lengths)
+        else:
+            return self.y
+
+    def apply_single_bar_traces(self, data_iter, locations_iter, lengths, b_axis, l_axis, names):
         # Handle Legend Groups
         if self._group_existing_legend:
             existing_group = self._figure.get_legendgroups()
         else:
             existing_group = {}
 
-        n_traces = data.shape[self._c_axis]
+        n_traces = len(lengths)
         n_additions = n_traces - len(self._traces["data"])
 
         default_trace = go.Bar()
         self.add_traces((default_trace,) * n_additions, group="data")
 
-        text_iter = self.text_iterator(data.shape[self._c_axis])
+        text_iter = self.text_iterator(lengths=lengths)
         trace_iter = iter(self._traces["data"])
-        trace_data = zip(text_iter, iterdim(data, self._c_axis), trace_iter)
-        for i, (text, bars, trace) in enumerate(trace_data):
+        trace_data = zip(text_iter, data_iter, locations_iter, trace_iter)
+        for i, (text, bars, locations, trace) in enumerate(trace_data):
             data = {l_axis: locations, b_axis: bars}
             trace.update(data)
             trace.name = names[i]
@@ -208,27 +245,27 @@ class BarPlot(BasePlot):
             trace.y = None
             trace.visible = False
 
-    def apply_separate_bar_traces(self, data: np.ndarray, locations, b_axis, l_axis, names):
+    def apply_separate_bar_traces(self, data_iter, locations_iter, lengths, b_axis, l_axis, names):
         # Handle Legend Groups
         if self._group_existing_legend:
             existing_group = self._figure.get_legendgroups()
         else:
             existing_group = {}
 
-        n_traces = len(data)
+        n_traces = sum(lengths)
         n_additions = n_traces - len(self._traces["data"])
 
         default_trace = go.Bar()
         self.add_traces((default_trace,) * n_additions, group="data")
 
-        text_iter = self.text_iterator(data.shape[self._c_axis])
+        text_iter = self.text_iterator(lengths=lengths)
         trace_iter = iter(self._traces["data"])
-        for g, (text_c, bars) in enumerate(zip(text_iter, iterdim(data, self._c_axis))):
+        for g, (text_c, bars, locations) in enumerate(zip(text_iter, data_iter, locations_iter)):
             if text_c is None:
                 text_c = itertools.repeat(None, len(bars))
             for i, (text, bar, location, trace) in enumerate(zip(text_c, bars, locations, trace_iter)):
-                data = {l_axis: [location], b_axis: [bar]}
-                trace.update(data)
+                updates = {l_axis: [location], b_axis: [bar]}
+                trace.update(updates)
                 trace.name = names[i]
                 trace.legendgroup = trace.name
                 if g > 0 or names[i] in existing_group:
@@ -270,39 +307,39 @@ class BarPlot(BasePlot):
 
         # Prepare Data to go in the correct orientation
         if self._orientation == 'v':
-            locations = self.x
-            data = self.y
+            data_iter = self.y_iterator([1])
+            n_bars = [len(d_c) for d_c in self.y_iterator([1])]
+            n_sets = len(n_bars)
+            locations_iter = self.x_iterator(n_bars)
+            locations = next(itertools.islice(self.x_iterator(n_bars), np.argmax(n_bars), None))
             l_axis = 'x'
             b_axis = 'y'
         elif self._orientation == 'h':
-            locations = self.y
-            data = self.x
+            data_iter = self.x_iterator([1])
+            n_bars = [len(d_c) for d_c in self.x_iterator([1])]
+            n_sets = len(n_bars)
+            locations_iter = self.y_iterator(n_bars)
+            locations = next(itertools.islice(self.y_iterator(n_bars), np.argmax(n_bars), None))
             l_axis = 'y'
             b_axis = 'x'
         else:
             raise ValueError(f"{self._orientation} is not a valid orientation. [v, h]")
 
-        n_bars = data.shape[self._axis]
-        n_sets = data.shape[self._c_axis]
-
-        if locations is None:
-            locations = self.generate_locations(n_locations=n_bars)
-
         # Generate Labels
-        labels = self.generate_labels(n_labels=n_bars)
+        labels = self.generate_labels(n_labels=max(n_bars))
 
         names = self.generate_names(n_names=n_sets)
         tick_labels = self.generate_tick_labels(labels=labels)
 
         # Apply Data to TraceContainer
         if self._separated_categories:
-            self.apply_separate_bar_traces(data, locations, b_axis, l_axis, labels)
+            self.apply_separate_bar_traces(data_iter, locations_iter, n_bars, b_axis, l_axis, labels)
         else:
-            self.apply_single_bar_traces(data, locations, b_axis, l_axis, names)
+            self.apply_single_bar_traces(data_iter, locations_iter, n_bars, b_axis, l_axis, names)
 
         # Apply Labels and Range
         tick_info = dict(
-            range=[-1 * self._trace_offset, n_bars * self._trace_offset],
+            range=[-1 * self._trace_offset, max(n_bars) * self._trace_offset],
             tickvals=locations,
             ticktext=tick_labels,
         )

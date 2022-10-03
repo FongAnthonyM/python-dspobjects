@@ -52,5 +52,9 @@ class ROCPrecisionRecallGroup(PlotGroup):
     )
     default_subplot_settings: dict[str, Any] = dict(rows=1, cols=2, horizontal_spacing=0.05)
     default_plots: Mapping[str, BasePlot | PlotGroup] = dict(roc=ROCPlot, precisionrecall=PrecisionRecallPlot)
+    # default_plot_settings: dict[str, dict[str, Any]] = dict(
+    #     roc=dict(xaxis=dict(constraintoward="right")),
+    #     precisionrecall=dict(xaxis=dict(constraintoward="left")),
+    # )
     default_locations: dict[str, tuple[int, int]] = dict(roc=(0, 0), precisionrecall=(0, 1))
     default_legend_group = "all"

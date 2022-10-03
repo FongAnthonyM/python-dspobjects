@@ -17,6 +17,7 @@ from typing import Any, Union
 
 # Third-Party Packages #
 from baseobjects import BaseDict, singlekwargdispatchmethod, search_sentinel
+from baseobjects.operations import union_recursive
 import plotly.graph_objects as go
 
 # Local Packages #
@@ -65,8 +66,11 @@ class PlotGroup(BaseDict):
     def __init__(
         self,
         figure: go.Figure | None = None,
-        locations: dict[str, tuple[int, int]] | None = None,
+        layout_settings: dict[str, Any] | None = None,
+        subplot_settings: dict[str, Any] | None = None,
         plot_settings: dict[str, dict[str, Any]] | None = None,
+        locations: dict[str, tuple[int, int]] | None = None,
+        build: bool = False,
         init: bool = True,
     ) -> None:
         # Parent Attributes #
@@ -77,7 +81,14 @@ class PlotGroup(BaseDict):
 
         # Object Construction #
         if init:
-            self.construct(figure=figure, locations=locations, plot_settings=plot_settings)
+            self.construct(
+                figure=figure,
+                layout_settings=layout_settings,
+                subplot_settings=subplot_settings,
+                plot_settings=plot_settings,
+                locations=locations,
+                build=build,
+            )
 
     @property
     def figure(self) -> go.Figure | None:
@@ -92,27 +103,32 @@ class PlotGroup(BaseDict):
     def construct(
         self,
         figure: go.Figure | None = None,
-        locations: Mapping[str, Mapping[str, int]] | None = None,
+        layout_settings: dict[str, Any] | None = None,
+        subplot_settings: dict[str, Any] | None = None,
         plot_settings: dict[str, dict[str, Any]] | None = None,
+        locations: Mapping[str, Mapping[str, int]] | None = None,
+        build: bool = False,
     ) -> None:
         if figure is not None:
             self._figure = figure
         elif self._figure is None:
+            layout_settings = layout_settings if layout_settings is not None else {}
+            subplot_settings = subplot_settings if subplot_settings is not None else {}
             self._figure = Figure()
-            self._figure.update_layout(self.default_layout_settings)
-            self._figure.set_subplots(**self.default_subplot_settings)
+            self._figure.update_layout(union_recursive(self.default_layout_settings, layout_settings))
+            self._figure.set_subplots(**union_recursive(self.default_subplot_settings, subplot_settings))
 
         if locations is not None:
-            locations = self.default_locations | locations
+            locations = union_recursive(self.default_locations, locations)
         else:
             locations = self.default_locations
 
         if plot_settings is not None:
-            plot_settings = self.default_plot_settings | plot_settings
+            plot_settings = union_recursive(self.default_plot_settings, plot_settings)
         else:
             plot_settings = self.default_plot_settings
 
-        default_kwargs = dict(figure=self._figure, build=False)
+        default_kwargs = dict(figure=self._figure, build=build)
         for name, plot in self.default_plots.items():
             kwargs = default_kwargs.copy()
             location = locations.get(name, search_sentinel)

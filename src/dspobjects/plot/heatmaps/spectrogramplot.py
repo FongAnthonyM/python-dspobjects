@@ -13,7 +13,8 @@ __email__ = __email__
 
 # Imports #
 # Standard Libraries #
-from collections.abc import Iterable
+from collections.abc import Iterator, Iterable, Sized
+import itertools
 from typing import Any
 
 # Third-Party Packages #
@@ -21,6 +22,7 @@ import numpy as np
 import plotly.graph_objects as go
 
 # Local Packages #
+from ...operations import iterdim
 from ..bases import Figure, Subplot
 from .heatmapplot import HeatmapPlot
 
@@ -98,10 +100,29 @@ class SpectrogramPlot(HeatmapPlot):
         )
 
     # Data Generation
-    def generate_x(self, n_samples: int) -> Iterable:
-        if self.x is not None:
-            return np.squeeze(self.x)
-        elif self._sample_rate is None:
-            return tuple(range(0, n_samples))
+    def x_iterator(self, lengths: Iterable[int] | None = None) -> Iterator:
+        if self.x is None:
+            if self._sample_rate is None:
+                return (np.arange(length) for length in lengths)
+            else:
+                return (np.arange(length) / self._sample_rate for length in lengths)
+        elif isinstance(self.x, np.ndarray):
+            return iterdim(self.x, self._c_axis)
+        elif isinstance(self.x, Sized) and len(self.x) == 1:
+            return itertools.repeat(self.x[0], len(lengths))
         else:
-            return np.arange(n_samples) / self._sample_rate
+            return iter(self.x)
+
+    def generate_x(self, lengths: Iterable[int] | None = None) -> Iterable:
+        if self.x is None:
+            if self._sample_rate is None:
+                return [np.arange(length) for length in lengths]
+            else:
+                return [np.arange(length) / self._sample_rate for length in lengths]
+        elif isinstance(self.x, np.ndarray):
+            return self.x
+        elif isinstance(self.x, Sized) and len(self.x) == 1:
+            return self.x * len(lengths)
+        else:
+            return self.x
+

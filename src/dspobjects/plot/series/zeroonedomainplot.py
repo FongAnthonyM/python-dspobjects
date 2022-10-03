@@ -36,7 +36,6 @@ class ZeroOneDomainPlot(SeriesPlot):
     default_xaxis_settings: dict[str, Any] = dict(
         range=[0, 1],
         constrain="domain",
-        scaleanchor="y",
         scaleratio=1,
         tickmode='linear',
         tick0=0,
@@ -50,7 +49,6 @@ class ZeroOneDomainPlot(SeriesPlot):
     default_yaxis_settings: dict[str, Any] = dict(
         range=[0, 1],
         constrain="domain",
-        scaleanchor="x",
         scaleratio=1,
         tickmode='linear',
         tick0=0,
@@ -61,3 +59,5 @@ class ZeroOneDomainPlot(SeriesPlot):
         linecolor='black',
         mirror=True
     )
+    default_scaleanchor_x_to_y: bool = True
+    default_scaleanchor_y_to_x: bool = True

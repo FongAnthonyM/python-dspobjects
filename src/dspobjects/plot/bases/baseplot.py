@@ -15,12 +15,13 @@ __email__ = __email__
 # Standard Libraries #
 from abc import abstractmethod
 import copy
-from collections.abc import Iterable, Iterator, Mapping
+from collections.abc import Iterable, Iterator, Mapping, Sized
 import itertools
 from typing import Any
 
 # Third-Party Packages #
 from baseobjects import BaseObject, singlekwargdispatchmethod
+from baseobjects.operations import union_recursive
 import numpy as np
 from plotly.basedatatypes import BaseTraceType
 import plotly.graph_objects as go
@@ -56,6 +57,8 @@ class BasePlot(BaseObject):
     default_title_settings: dict[str, Any] = dict()
     default_xaxis_settings: dict[str, Any] = dict()
     default_yaxis_settings: dict[str, Any] = dict()
+    default_scaleanchor_x_to_y: bool = False
+    default_scaleanchor_y_to_x: bool = False
     default_static_trace_settings: dict[str, Any] = dict(showlegend=False)
     default_trace_settings: dict[str, Any] = dict()
     default_hovertemplate: str | None = None
@@ -260,56 +263,44 @@ class BasePlot(BaseObject):
             return None
 
     @property
-    def x(self) -> np.ndarray | None:
+    def x(self) -> Iterable | None:
         return self._x
 
     @x.setter
     def x(self, value) -> None:
-        if value is None:
-            self._x = None
-        else:
-            value = value if isinstance(value, np.ndarray) else np.array(value)
-            value = value if value.ndim > 1 else np.expand_dims(value, 1)
-            self._x = value
+        if (isinstance(value, np.ndarray) and value.ndim == 1) or not isinstance(value[0], Iterable):
+            value = [value]
+        self._x = value
 
     @property
-    def y(self) -> np.ndarray | None:
+    def y(self) -> Iterable | None:
         return self._y
 
     @y.setter
     def y(self, value) -> None:
-        if value is None:
-            self._y = None
-        else:
-            value = value if isinstance(value, np.ndarray) else np.array(value)
-            value = value if value.ndim > 1 else np.expand_dims(value, 1)
-            self._y = value
+        if (isinstance(value, np.ndarray) and value.ndim == 1) or not isinstance(value[0], Iterable):
+            value = [value]
+        self._y = value
 
     @property
-    def z(self) -> np.ndarray | None:
+    def z(self) -> Iterable | None:
         return self._z
 
     @z.setter
     def z(self, value) -> None:
-        if value is None:
-            self._z = None
-        else:
-            value = value if isinstance(value, np.ndarray) else np.array(value)
-            value = value if value.ndim > 1 else np.expand_dims(value, 1)
-            self._z = value
+        if (isinstance(value, np.ndarray) and value.ndim == 1) or not isinstance(value[0], Iterable):
+            value = [value]
+        self._z = value
 
     @property
-    def text(self) -> np.ndarray | None:
+    def text(self) -> Iterable | None:
         return self._text
 
     @text.setter
     def text(self, value) -> None:
-        if value is None:
-            self._text = None
-        else:
-            value = value if isinstance(value, np.ndarray) else np.array(value)
-            value = value if value.ndim > 1 else np.expand_dims(value, 1)
-            self._text = value
+        if isinstance(value, np.ndarray) and value.ndim == 1:
+            value = [value]
+        self._text = value
 
     @property
     def labels(self) -> Iterable[str]:
@@ -375,13 +366,19 @@ class BasePlot(BaseObject):
             **kwargs,
         )
 
-        title_settings = self.default_title_settings | title if title is not None else self.default_title_settings
-        xaxis_settings = self.default_xaxis_settings | xaxis if xaxis is not None else self.default_xaxis_settings
-        yaxis_settings = self.default_yaxis_settings | yaxis if yaxis is not None else self.default_yaxis_settings
+        title_settings = union_recursive(self.default_title_settings, title) if title is not None else self.default_title_settings
+        xaxis_settings = union_recursive(self.default_xaxis_settings, xaxis) if xaxis is not None else self.default_xaxis_settings
+        yaxis_settings = union_recursive(self.default_yaxis_settings, yaxis) if yaxis is not None else self.default_yaxis_settings
 
         self.update_title(title_settings)
         self.update_xaxis(xaxis_settings)
         self.update_yaxis(yaxis_settings)
+
+        if self.default_scaleanchor_x_to_y:
+            self.scaleanchor_x_to_y()
+
+        if self.default_scaleanchor_y_to_x:
+            self.scaleanchor_y_to_x()
 
         if build:
             self.build()
@@ -538,6 +535,14 @@ class BasePlot(BaseObject):
         else:
             self._figure.layout.yaxis.update(dict1=dict1, overwrite=overwrite, **kwargs)
 
+    def scaleanchor_x_to_y(self):
+        axis_name = self.yaxis.plotly_name.replace("axis", '')
+        self.update_xaxis(scaleanchor=axis_name)
+
+    def scaleanchor_y_to_x(self):
+        axis_name = self.xaxis.plotly_name.replace("axis", '')
+        self.update_yaxis(scaleanchor=axis_name)
+
     # TraceContainer
     @abstractmethod
     def set_trace_color(self, trace: int | BaseTraceType, color: str) -> None:
@@ -631,14 +636,54 @@ class BasePlot(BaseObject):
                 trace.showlegend = False
 
     # Data Generation
-    def generate_x(self, n_samples: int) -> tuple | np.ndarray:
-        return tuple(range(n_samples)) if self.x is None else np.squeeze(self.x)
+    def _data_iterator(self, data: Iterable | None, lengths: Iterable[int] | None = None) -> Iterator:
+        if data is None:
+            return (np.arange(length) for length in lengths)
+        elif isinstance(data, np.ndarray):
+            return iterdim(data, self._c_axis)
+        elif isinstance(data, Sized) and len(data) == 1:
+            return itertools.repeat(data[0], len(lengths))
+        else:
+            return iter(data)
 
-    def generate_y(self, n_samples: int) -> tuple | np.ndarray:
-        return tuple(range(n_samples)) if self.y is None else np.squeeze(self.y)
+    def _data_generator(self, data: Iterable | None, lengths: Iterable[int] | None = None) -> Iterable:
+        if data is None:
+            return [np.arange(length) for length in lengths]
+        elif isinstance(data, np.ndarray):
+            return data
+        elif isinstance(data, Sized) and len(data) == 1:
+            return data * len(lengths)
+        else:
+            return data
 
-    def generate_z(self, n_samples: int) -> tuple | np.ndarray:
-        return tuple(range(0, n_samples))
+    def x_iterator(self, lengths: Iterable[int] | None = None) -> Iterator:
+        return self._data_iterator(data=self.x, lengths=lengths)
+
+    def generate_x(self, lengths: Iterable[int] | None = None) -> Iterable:
+        return self._data_generator(data=self.x, lengths=lengths)
+
+    def y_iterator(self, lengths: Iterable[int] | None = None) -> Iterator:
+        return self._data_iterator(data=self.y, lengths=lengths)
+
+    def generate_y(self, lengths: Iterable[int] | None = None) -> Iterable:
+        return self._data_generator(data=self.y, lengths=lengths)
+
+    def z_iterator(self, lengths: Iterable[int] | None = None) -> Iterator:
+        return self._data_iterator(data=self.z, lengths=lengths)
+
+    def generate_z(self, lengths: Iterable[int] | None = None) -> Iterable:
+        return self._data_generator(data=self.z, lengths=lengths)
+
+    # Text
+    def text_iterator(self, lengths: Iterable[int] | None = None) -> Iterator:
+        if self._text is None:
+            return ([""] * length for length in lengths)
+        elif isinstance(self._text, np.ndarray):
+            return iterdim(self._text, self._c_axis)
+        elif isinstance(self._text, Sized) and len(self._text) == 1:
+            return itertools.repeat(self._text[0], len(lengths))
+        else:
+            return iter(self._text)
 
     def generate_labels(self, n_labels: int) -> Iterable[str]:
         if self._labels is None:
@@ -652,11 +697,11 @@ class BasePlot(BaseObject):
         if self._names is not None:
             return [f"[Index {i + 1}] {name}" for i, name in enumerate(names)] if self._label_index else self._names
         elif names is not None:
-            return [f"[Set {i + 1}] {name}" for i, name in enumerate(names)] if self._label_index else names
+            return [f"[Index {i + 1}] {name}" for i, name in enumerate(names)] if self._label_index else names
         elif self._label_index:
-            return [f"[Set {i + 1}] Bar Set {i + 1}" for i in range(n_names)]
+            return [f"[Index {i + 1}] Bar Set {i + 1}" for i in range(n_names)]
         else:
-            return [f"Set {i + 1}" for i in range(n_names)]
+            return [f"Index {i + 1}" for i in range(n_names)]
 
     def generate_tick_labels(self, labels: Iterable[str]) -> list[str]:
         # Apply Index to Labels
@@ -669,16 +714,6 @@ class BasePlot(BaseObject):
             tick_labels = labels
 
         return tick_labels
-
-    # Text
-    def text_iterator(self, channels: int):
-        if self._text is not None:
-            if self.text.shape[self._c_axis] == 1:
-                return itertools.repeat(np.squeeze(self._text), channels)
-            else:
-                return iterdim(self._text, self._c_axis)
-        else:
-            return itertools.repeat(None, channels)
 
     # Plotting
     def add_static_trace(self, name: str, trace: BaseTraceType) -> None:
