@@ -35,7 +35,6 @@ class IndexDateTime(NamedTuple):
     """A named tuple for returning an index with a datetime."""
     index: int | None
     datetime: datetime.datetime | None
-    timestamp: float | None
 
 
 # Found Ranges #
@@ -58,7 +57,6 @@ class FoundData(NamedTuple):
     data: np.ndarray | None
     index: int | None
     datetime: datetime.datetime | None
-    timestamp: float | None
 
 
 class FoundDataRange(NamedTuple):
