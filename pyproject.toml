@@ -5,18 +5,18 @@ description = "Objects for digital signal processing."
 authors = ["Anthony Fong <FongAnthonyM@gmail.com>"]
 license = "MIT"
 readme = "README.rst"
-homepage = "https://github.com/fongant/python-baseobjects"
-repository = "https://github.com/fongant/python-baseobjects"
-documentation = "https://python-baseobjects.readthedocs.io"
+homepage = "https://github.com/fongant/python-dspobjects"
+repository = "https://github.com/fongant/python-aseobjects"
+documentation = "https://python-dspobjects.readthedocs.io"
 packages = [
-    { include = "baseobjects", from = "src" },
+    { include = "dspobjects", from = "src" },
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",
 ]
 
 [tool.poetry.urls]
-Changelog = "https://github.com/fongant/python-baseobjects/releases"
+Changelog = "https://github.com/fongant/python-dspobjects/releases"
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -49,14 +49,14 @@ sphinx-click = "^3.0.2"
 Pygments = "^2.10.0"
 
 [tool.poetry.scripts]
-python-baseobjects = "baseobjects.__main__:main"
+python-dspobjects = "dspobjects.__main__:main"
 
 [tool.coverage.paths]
 source = ["src", "*/site-packages"]
 
 [tool.coverage.run]
 branch = true
-source = ["baseobjects"]
+source = ["dspobjects"]
 
 [tool.coverage.report]
 show_missing = true

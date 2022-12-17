@@ -1,4 +1,4 @@
-baseobjects
+dspobjects
 ============
 
 |PyPI| |Status| |Python Version| |License|
@@ -7,26 +7,26 @@ baseobjects
 
 |pre-commit| |Black|
 
-.. |PyPI| image:: https://img.shields.io/pypi/v/baseobjects.svg
-   :target: https://pypi.org/project/baseobjects/
+.. |PyPI| image:: https://img.shields.io/pypi/v/dspobjects.svg
+   :target: https://pypi.org/project/dspobjects/
    :alt: PyPI
-.. |Status| image:: https://img.shields.io/pypi/status/baseobjects.svg
-   :target: https://pypi.org/project/baseobjects/
+.. |Status| image:: https://img.shields.io/pypi/status/dspobjects.svg
+   :target: https://pypi.org/project/dspobjects/
    :alt: Status
-.. |Python Version| image:: https://img.shields.io/pypi/pyversions/baseobjects
-   :target: https://pypi.org/project/baseobjects
+.. |Python Version| image:: https://img.shields.io/pypi/pyversions/dspobjects
+   :target: https://pypi.org/project/dspobjects
    :alt: Python Version
-.. |License| image:: https://img.shields.io/pypi/l/baseobjects
+.. |License| image:: https://img.shields.io/pypi/l/dspobjects
    :target: https://opensource.org/licenses/MIT
    :alt: License
-.. |Read the Docs| image:: https://img.shields.io/readthedocs/python-baseobjects/latest.svg?label=Read%20the%20Docs
-   :target: https://python-baseobjects.readthedocs.io/
-   :alt: Read the documentation at https://python-baseobjects.readthedocs.io/
-.. |Tests| image:: https://github.com/fongant/python-baseobjects/workflows/Tests/badge.svg
-   :target: https://github.com/fongant/baseobjects/actions?workflow=Tests
+.. |Read the Docs| image:: https://img.shields.io/readthedocs/python-dspobjects/latest.svg?label=Read%20the%20Docs
+   :target: https://python-dspobjects.readthedocs.io/
+   :alt: Read the documentation at https://python-dspobjects.readthedocs.io/
+.. |Tests| image:: https://github.com/fongant/python-dspobjects/workflows/Tests/badge.svg
+   :target: https://github.com/fongant/dspobjects/actions?workflow=Tests
    :alt: Tests
-.. |Codecov| image:: https://codecov.io/gh/fongant/python-baseobjects/branch/main/graph/badge.svg
-   :target: https://codecov.io/gh/fongant/python-baseobjects
+.. |Codecov| image:: https://codecov.io/gh/fongant/python-dspobjects/branch/main/graph/badge.svg
+   :target: https://codecov.io/gh/fongant/python-dspobjects
    :alt: Codecov
 .. |pre-commit| image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white
    :target: https://github.com/pre-commit/pre-commit
@@ -51,11 +51,11 @@ Requirements
 Installation
 ------------
 
-You can install *baseobjects* via pip_ from PyPI_:
+You can install *dspobjects* via pip_ from PyPI_:
 
 .. code:: console
 
-   $ pip install baseobjects
+   $ pip install dspobjects
 
 
 Usage
@@ -75,7 +75,7 @@ License
 -------
 
 Distributed under the terms of the `MIT license`_,
-*baseobjects* is free and open source software.
+*dspobjects* is free and open source software.
 
 
 Issues
@@ -95,8 +95,8 @@ This project was generated from `@cjolowicz`_'s `Hypermodern Python Cookiecutter
 .. _MIT license: https://opensource.org/licenses/MIT
 .. _PyPI: https://pypi.org/
 .. _Hypermodern Python Cookiecutter: https://github.com/cjolowicz/cookiecutter-hypermodern-python
-.. _file an issue: https://github.com/fongant/python-baseobjects/issues
+.. _file an issue: https://github.com/fongant/python-dspobjects/issues
 .. _pip: https://pip.pypa.io/
 .. github-only
 .. _Contributor Guide: CONTRIBUTING.rst
-.. _Usage: https://python-baseobjects.readthedocs.io/en/latest/usage.html
+.. _Usage: https://python-dspobjects.readthedocs.io/en/latest/usage.html
