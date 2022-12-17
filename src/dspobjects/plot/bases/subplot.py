@@ -13,6 +13,7 @@ __email__ = __email__
 
 # Imports #
 # Standard Libraries #
+from typing import  Any
 
 # Third-Party Packages #
 from baseobjects import BaseObject
@@ -41,8 +42,13 @@ class Subplot(BaseObject):
         row: int | None = None,
         col: int | None = None,
         title: go.layout.Annotation | None = None,
-        init: bool = True
+        init: bool = True,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
+        # Parent Attributes #
+        super().__init__(*args, int=init, **kwargs)
+
         # New Attributes #
         self.figure: go.Figure | None = None
         self.row: int = 1

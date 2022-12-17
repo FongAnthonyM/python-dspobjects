@@ -14,6 +14,7 @@ __email__ = __email__
 # Imports #
 # Standard Libraries #
 from fractions import Fraction
+from typing import Any
 
 # Third-Party Packages #
 from baseobjects import BaseObject
@@ -80,7 +81,21 @@ def remove_dc_offset(data=None, axis=0, copy_=True):
 class Resample(BaseObject):
     # Magic Methods
     # Construction/Destruction
-    def __init__(self, data=None, new_fs=None, old_fs=None, axis=0, interp_type="linear", aa_filters=None, init=True):
+    def __init__(
+        self,
+        data=None,
+        new_fs=None,
+        old_fs=None,
+        axis=0,
+        interp_type="linear",
+        aa_filters=None,
+        init=True,
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
+        # Parent Attributes #
+        super().__init__(*args, int=init, **kwargs)
+
         self.n_limit = 100
         self.aa_corner = 250
 

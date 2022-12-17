@@ -23,7 +23,7 @@ import plotly.graph_objects as go
 import numpy as np
 
 # Local Packages #
-from ...operations import iterdim
+from ...operations import iteraxis
 from ..bases import Figure, Subplot, BasePlot
 
 
@@ -168,7 +168,7 @@ class SeriesPlot(BasePlot):
             else:
                 return ([""] * length for length in lengths)
         elif isinstance(self._text, np.ndarray):
-            return iterdim(self._text, self._c_axis)
+            return iteraxis(self._text, self._c_axis)
         elif isinstance(self._text, Sized) and len(self._text) == 1:
             return itertools.repeat(self._text[0], len(lengths))
         else:

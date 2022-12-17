@@ -22,7 +22,7 @@ import numpy as np
 import plotly.graph_objects as go
 
 # Local Packages #
-from ...operations import iterdim
+from ...operations import iteraxis
 from ..bases import Figure, Subplot
 from .heatmapplot import HeatmapPlot
 
@@ -48,15 +48,15 @@ class SpectrogramPlot(HeatmapPlot):
     # Magic Methods #
     # Construction/Destruction
     def __init__(
-            self,
-            figure: Figure | None = None,
-            subplot: Subplot | None = None,
-            x: np.ndarray | None = None,
-            y: np.ndarray | None = None,
-            z: np.ndarray | None = None,
-            sample_rate: float | None = None,
-            init: bool = True,
-            **kwargs: Any,
+        self,
+        figure: Figure | None = None,
+        subplot: Subplot | None = None,
+        x: np.ndarray | None = None,
+        y: np.ndarray | None = None,
+        z: np.ndarray | None = None,
+        sample_rate: float | None = None,
+        init: bool = True,
+        **kwargs: Any,
     ) -> None:
         # Parent Attributes #
         super().__init__(init=False)
@@ -82,12 +82,12 @@ class SpectrogramPlot(HeatmapPlot):
 
     # Instance Methods #
     def _update_attributes(
-            self,
-            x: np.ndarray | None = None,
-            y: np.ndarray | None = None,
-            z: np.ndarray | None = None,
-            sample_rate: float | None = None,
-            **kwargs: Any,
+        self,
+        x: np.ndarray | None = None,
+        y: np.ndarray | None = None,
+        z: np.ndarray | None = None,
+        sample_rate: float | None = None,
+        **kwargs: Any,
     ) -> None:
         if sample_rate is not None:
             self._sample_rate = sample_rate
@@ -107,7 +107,7 @@ class SpectrogramPlot(HeatmapPlot):
             else:
                 return (np.arange(length) / self._sample_rate for length in lengths)
         elif isinstance(self.x, np.ndarray):
-            return iterdim(self.x, self._c_axis)
+            return iteraxis(self.x, self._c_axis)
         elif isinstance(self.x, Sized) and len(self.x) == 1:
             return itertools.repeat(self.x[0], len(lengths))
         else:

@@ -28,7 +28,7 @@ import plotly.graph_objects as go
 import plotly.express as px
 
 # Local Packages #
-from ...operations import iterdim
+from ...operations import iteraxis
 from .subplot import Subplot
 from .tracecontainer import TraceContainer
 from .figure import Figure
@@ -95,7 +95,12 @@ class BasePlot(BaseObject):
         static_trace_settings: dict[str, Any] | None = None,
         build: bool = True,
         init: bool = True,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
+        # Parent Attributes #
+        super().__init__(*args, int=init, **kwargs)
+
         # New Attributes #
         # Settings
         self._layout_settings: dict[str, Any] = self.default_layout_settings.copy()
@@ -640,7 +645,7 @@ class BasePlot(BaseObject):
         if data is None:
             return (np.arange(length) for length in lengths)
         elif isinstance(data, np.ndarray):
-            return iterdim(data, self._c_axis)
+            return iteraxis(data, self._c_axis)
         elif isinstance(data, Sized) and len(data) == 1:
             return itertools.repeat(data[0], len(lengths))
         else:
@@ -679,7 +684,7 @@ class BasePlot(BaseObject):
         if self._text is None:
             return ([""] * length for length in lengths)
         elif isinstance(self._text, np.ndarray):
-            return iterdim(self._text, self._c_axis)
+            return iteraxis(self._text, self._c_axis)
         elif isinstance(self._text, Sized) and len(self._text) == 1:
             return itertools.repeat(self._text[0], len(lengths))
         else:

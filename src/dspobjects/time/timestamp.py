@@ -35,7 +35,7 @@ class Timestamp(pd.Timestamp):
     # Class Methods #
     @classmethod
     def fromnanostamp(cls, t: float | int | np.dtype, tz: tzinfo | None = timezone.utc) -> "Timestamp":
-        return cls._UNIX_EPOCH.replace(tzinfo=tz) + pd.Timedelta(nanoseconds=t)
+        return cls.fromtimestamp(t/10**9, tz)
 
     @classmethod
     def fromdecimal(cls, t: Decimal, tz: tzinfo | None = timezone.utc) -> "Timestamp":

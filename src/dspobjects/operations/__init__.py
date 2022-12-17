@@ -13,4 +13,4 @@ __email__ = __email__
 # Imports #
 # Local Packages #
 from .nanarray import nan_array
-from .iterdim import iterdim
+from .iteraxis import iteraxis

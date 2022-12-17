@@ -1,4 +1,4 @@
-""" iterdim.py
+""" iteraxis.py
 A function that iterates over a specific dimension of a ndarray.
 """
 # Package Header #
@@ -22,7 +22,7 @@ import numpy as np
 
 # Definitions #
 # Functions #
-def iterdim(a: np.ndarray, axis: int = 0) -> np.ndarray:
+def iteraxis(a: np.ndarray, axis: int = 0) -> np.ndarray:
     """Iterates over a given axis of an array.
 
     Args:
@@ -32,6 +32,7 @@ def iterdim(a: np.ndarray, axis: int = 0) -> np.ndarray:
     Returns:
         The data at an element of the axis.
     """
-    slices = (slice(None),) * axis
-    for i in range(a.shape[axis]):
-        yield a[slices + (i,)]
+    if axis == 0:
+        return a
+    else:
+        return np.moveaxis(a, axis, 0)

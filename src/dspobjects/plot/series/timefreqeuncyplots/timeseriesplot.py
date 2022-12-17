@@ -21,7 +21,7 @@ from typing import Any
 import numpy as np
 
 # Local Packages #
-from ....operations import iterdim
+from ....operations import iteraxis
 from ...bases import Figure, Subplot
 from ..stackedseriesplot import StackedSeriesPlot
 
@@ -119,7 +119,7 @@ class TimeSeriesPlot(StackedSeriesPlot):
             else:
                 return (np.arange(length) / self._sample_rate for length in lengths)
         elif isinstance(self.x, np.ndarray):
-            return iterdim(self.x, self._c_axis)
+            return iteraxis(self.x, self._c_axis)
         elif isinstance(self.x, Sized) and len(self.x) == 1:
             return itertools.repeat(self.x[0], len(lengths))
         else:

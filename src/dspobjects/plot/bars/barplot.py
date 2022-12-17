@@ -24,7 +24,7 @@ from plotly.basedatatypes import BaseTraceType
 import plotly.graph_objects as go
 
 # Local Packages #
-from ...operations import iterdim
+from ...operations import iteraxis
 from ..bases import Figure, Subplot, BasePlot
 
 
@@ -176,7 +176,7 @@ class BarPlot(BasePlot):
         if self.x is None:
             return (np.arange(length) * self._trace_offset for length in lengths)
         elif isinstance(self.x, np.ndarray):
-            return iterdim(self.x, self._c_axis)
+            return iteraxis(self.x, self._c_axis)
         elif isinstance(self.x, Sized) and len(self.x) == 1:
             return itertools.repeat(self.x[0], len(lengths))
         else:
@@ -196,7 +196,7 @@ class BarPlot(BasePlot):
         if self.y is None:
             return (np.arange(length) * self._trace_offset for length in lengths)
         elif isinstance(self.y, np.ndarray):
-            return iterdim(self.y, self._c_axis)
+            return iteraxis(self.y, self._c_axis)
         elif isinstance(self.y, Sized) and len(self.y) == 1:
             return itertools.repeat(self.y[0], len(lengths))
         else:
