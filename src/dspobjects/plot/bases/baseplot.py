@@ -1,5 +1,5 @@
 """ baseplot.py
-
+A base plot object which wraps arround the plotly API.
 """
 # Package Header #
 from ...header import *
@@ -37,11 +37,63 @@ from .figure import Figure
 # Definitions #
 # Classes #
 class BasePlot(BaseObject):
-    """
+    """A base plot object which wraps arround the plotly API.
 
     Class Attributes:
+        default_layout_settings: The default plotly settings for the layout of the figure for this plot.
+        default_title_settings: The default plotly settings for the title of this plot.
+        default_xaxis_settings: The default plotly settings for the for the X axis.
+        default_yaxis_settings: The default plotly settings for the for the Y axis.
+        default_scaleanchor_x_to_y: Determines is if the X axis will scale to the Y axis.
+        default_scaleanchor_y_to_x: Determines is if the Y axis will scale to the X axis.
+        default_static_trace_settings: The default static traces settings, traces which will not change with new data.
+        default_trace_settings: The default trace settings.
+        default_hovertemplate: The default hovertemplate of this plot.
+        default_color_sequence: The default color sequence this plot will use when making traces.
+        default_x_unit: The default X units of measurement of this plot.
+        default_y_unit: The default Y units of measurement of this plot.
+        default_z_unit: The default Z units of measurement of this plot.
+        default_static_traces: The default static traces of this plot.
 
     Attributes:
+        _layout_settings: The plotly settings for the layout of the figure for this plot.
+        _trace_settings_: The settings for the traces.
+        _hovertemplate_: The default hovertemplate of this plot.
+        _static_trace_settings: The settings for the static traces.
+        _static_traces: The static traces.
+        _group_existing_legend: Deterimnes if traces will be grouped in the legend.
+
+        _color_sequence: The sequence of colors to use when ploting.
+        _color_cycle: An iterator of the color sequence.
+
+        _name: The name of this plot.
+        _names: The names of traces.
+        _trace_offset: The offset of between each of the traces.
+
+        _axis: The axis which the data is ploted along.
+        _c_axis: The axis which the data channels are along.
+
+        _label_axis: bool = True
+        _label_index: bool = True
+        _tick_index_only: bool = True
+
+        _x_unit: The X units of measurement of this plot.
+        _y_unit: The Y units of measurement of this plot.
+        _z_unit: The Z units of measurement of this plot.
+
+        _figure: The Figure of this plot.
+        _subplot: The Subplot object of this plot.
+        _xaxis: The X Axis object of this plot.
+        _yaxis: The Y Axis object of this plot.
+
+        _x: The x data of this plot.
+        _y: The y data of this plot.
+        _z: The z data of this plot.
+        _text: The text at each point of this plot.
+
+        _labels: The labels of this plot.
+
+        _traces: The traces of this plot.
 
     Args:
 
@@ -98,9 +150,6 @@ class BasePlot(BaseObject):
         *args: Any,
         **kwargs: Any,
     ) -> None:
-        # Parent Attributes #
-        super().__init__(*args, int=init, **kwargs)
-
         # New Attributes #
         # Settings
         self._layout_settings: dict[str, Any] = self.default_layout_settings.copy()
@@ -144,11 +193,15 @@ class BasePlot(BaseObject):
 
         self._traces: TraceContainer | None = None
 
-        # Object Construction #
+        # Colors
         if self.default_color_sequence is not None:
             self._color_sequence = copy.copy(self.default_color_sequence)
             self._color_cycle = itertools.cycle(self._color_sequence)
 
+        # Parent Attributes #
+        super().__init__(*args, int=init, **kwargs)
+
+        # Object Construction #
         if init:
             self.construct(
                 figure=figure,

@@ -13,5 +13,6 @@ __email__ = __email__
 
 # Imports #
 # Local Packages #
+from .getlocalzone import get_localzone
 from .timestamp import Timestamp, NANO_SCALE
 from .nanostamp import nanostamp

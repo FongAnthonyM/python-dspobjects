@@ -34,6 +34,10 @@ def nan_array(shape: int | Iterable | tuple[int], dtype: object | None = None, *
     Returns:
         The array of NaNs.
     """
-    a = np.empty(shape=shape, dtype=dtype, **kwargs)
-    a.fill(np.nan)
+    a = np.zeros(shape=shape, dtype=dtype, **kwargs)
+    try:
+        a.fill(np.nan)
+    except ValueError:
+        pass
+
     return a

@@ -13,11 +13,13 @@ __email__ = __email__
 
 # Imports #
 # Standard Libraries #
-import datetime
+from datetime import datetime, timezone
+import time
 
 # Third-Party Packages #
 from baseobjects import singlekwargdispatch
 import numpy as np
+import pandas as pd
 
 # Local Packages #
 from .timestamp import Timestamp, NANO_SCALE
@@ -26,7 +28,7 @@ from .timestamp import Timestamp, NANO_SCALE
 # Definitions #
 # Functions #
 @singlekwargdispatch("value")
-def nanostamp(value: datetime.datetime | float | int | np.dtype, is_nano: bool = False) -> np.uint64:
+def nanostamp(value: datetime | float | int | np.dtype, is_nano: bool = False) -> np.uint64:
     """Creates a nanostamp from the input.
 
     Args:
@@ -51,18 +53,22 @@ def _nanostamp(value: np.uint64, is_nano: bool = True) -> np.uint64:
 
 
 @nanostamp.register
-def _nanostamp(value: Timestamp, is_nano: bool = False) -> np.uint64:
+def _nanostamp(value: pd.Timestamp, is_nano: bool = False) -> np.uint64:
     """Creates a nanostamp from the input.
 
     Args:
         value: The value create the nanostamp from.
         is_nano: Determines if the input is in nanoseconds.
     """
-    return value.nanostamp()
+    if value.tz is None:
+        local_time = time.localtime()
+        return np.uint64((value - Timestamp._UNIX_EPOCH - pd.Timedelta(seconds=local_time.tm_gmtoff)).value)
+    else:
+        return np.uint64((value.astimezone(timezone.utc) - Timestamp.UNIX_EPOCH).value)
 
 
 @nanostamp.register
-def _nanostamp(value: datetime.datetime, is_nano: bool = False) -> np.uint64:
+def _nanostamp(value: datetime, is_nano: bool = False) -> np.uint64:
     """Creates a nanostamp from the input.
 
     Args:
