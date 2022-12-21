@@ -75,7 +75,7 @@ def _nanostamp(value: datetime, is_nano: bool = False) -> np.uint64:
         value: The value create the nanostamp from.
         is_nano: Determines if the input is in nanoseconds.
     """
-    return np.uint64(value.timestamp()) * NANO_SCALE
+    return np.uint64(value.timestamp() * NANO_SCALE)
 
 
 @nanostamp.register(float)
@@ -91,4 +91,4 @@ def _nanostamp(value: float | int | np.dtype, is_nano: bool = False) -> np.uint6
     if is_nano:
         return np.uint64(value)
     else:
-        return np.uint64(value) * NANO_SCALE
+        return np.uint64(value * NANO_SCALE)
