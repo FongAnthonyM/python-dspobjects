@@ -82,7 +82,7 @@ def _nanostamp(value: datetime, is_nano: bool = False) -> np.uint64:
 @nanostamp.register(int)
 @nanostamp.register(np.dtype)
 def _nanostamp(value: float | int | np.dtype, is_nano: bool = False) -> np.uint64:
-    """"Creates a nanostamp from the input.
+    """Creates a nanostamp from the input.
 
     Args:
         value: The value create the nanostamp from.
