@@ -28,7 +28,7 @@ from .timestamp import Timestamp, NANO_SCALE
 # Definitions #
 # Functions #
 @singlekwargdispatch("value")
-def nanostamp(value: datetime | float | int | np.dtype, is_nano: bool = False) -> np.uint64:
+def nanostamp(value: datetime | float | int | np.dtype | np.ndarray, is_nano: bool = False) -> np.uint64 | np.ndarray:
     """Creates a nanostamp from the input.
 
     Args:
@@ -59,6 +59,9 @@ def _nanostamp(value: pd.Timestamp, is_nano: bool = False) -> np.uint64:
     Args:
         value: The value create the nanostamp from.
         is_nano: Determines if the input is in nanoseconds.
+    
+    Returns:
+        A nanostamp.
     """
     if value.tz is None:
         local_time = time.localtime()
@@ -74,8 +77,28 @@ def _nanostamp(value: datetime, is_nano: bool = False) -> np.uint64:
     Args:
         value: The value create the nanostamp from.
         is_nano: Determines if the input is in nanoseconds.
+
+    Returns:
+        A nanostamp.
     """
     return np.uint64(value.timestamp() * NANO_SCALE)
+
+
+@nanostamp.register
+def _nanostamp(value: np.ndarray, is_nano: bool = False) -> np.ndarray:
+    """Creates an array of nanostamps from the input.
+
+    Args:
+        value: The value create the nanostamp from.
+        is_nano: Determines if the input is in nanoseconds.
+
+    Returns:
+        An array of nanostamps.
+    """
+    if not is_nano:
+        value = value * NANO_SCALE
+    
+    return value.astype(np.uint64)
 
 
 @nanostamp.register(float)
@@ -87,6 +110,9 @@ def _nanostamp(value: float | int | np.dtype, is_nano: bool = False) -> np.uint6
     Args:
         value: The value create the nanostamp from.
         is_nano: Determines if the input is in nanoseconds.
+
+    Returns:
+        A nanostamp.
     """
     if is_nano:
         return np.uint64(value)

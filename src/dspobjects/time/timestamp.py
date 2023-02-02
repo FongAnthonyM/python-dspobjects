@@ -48,7 +48,7 @@ class Timestamp(pd.Timestamp):
             A Timestamp that is the time of the nanostamp.
         """
         if isinstance(t, Decimal):
-            t = int(Decimal)
+            t = int(t)
 
         if tz is None:
             local_time = time.localtime()
@@ -68,7 +68,7 @@ class Timestamp(pd.Timestamp):
             A Timestamp that is the time of the Decimal timestamp.
         """
         integer = np.uint64(round(t))
-        nts = integer * _NANO_SCALE + np.uint64(t - integer) * _NANO_SCALE
+        nts = integer * NANO_SCALE + np.uint64(t - integer) * NANO_SCALE
 
         if tz is None:
             local_time = time.localtime()
