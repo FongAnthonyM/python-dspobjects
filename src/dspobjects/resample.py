@@ -94,7 +94,7 @@ class Resample(BaseObject):
         **kwargs: Any,
     ) -> None:
         # Parent Attributes #
-        super().__init__(*args, int=init, **kwargs)
+        super().__init__(*args, init=init, **kwargs)
 
         self.n_limit = 100
         self.aa_corner = 250
