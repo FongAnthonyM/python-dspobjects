@@ -17,7 +17,7 @@ from datetime import datetime, timezone
 import time
 
 # Third-Party Packages #
-from baseobjects import singlekwargdispatch
+from baseobjects.functions import singlekwargdispatch
 import numpy as np
 import pandas as pd
 

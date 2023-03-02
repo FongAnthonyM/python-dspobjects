@@ -16,7 +16,8 @@ from collections.abc import Iterable, Mapping
 from typing import Any, Union
 
 # Third-Party Packages #
-from baseobjects import BaseDict, singlekwargdispatchmethod, search_sentinel
+from baseobjects import BaseDict, search_sentinel
+from baseobjects.functions import singlekwargdispatch
 from baseobjects.operations import union_recursive
 import plotly.graph_objects as go
 
@@ -202,7 +203,7 @@ class PlotGroup(BaseDict):
 
         return tuple(all_plots)
 
-    @singlekwargdispatchmethod("key")
+    @singlekwargdispatch("key")
     def get_plot(self, key: Iterable[str] | str) -> BasePlot:
         raise ValueError(f"{type(key)} is an invalid type for get_plot")
     

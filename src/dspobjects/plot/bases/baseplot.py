@@ -20,7 +20,8 @@ import itertools
 from typing import Any
 
 # Third-Party Packages #
-from baseobjects import BaseObject, singlekwargdispatchmethod
+from baseobjects import BaseObject
+from baseobjects.functions import singlekwargdispatch
 from baseobjects.operations import union_recursive
 import numpy as np
 from plotly.basedatatypes import BaseTraceType
@@ -546,7 +547,7 @@ class BasePlot(BaseObject):
             y_subplot = f"y{'' if (col - 1) <= 0 else (col - 1)}"
             trace.update(xaxis=x_subplot, yaxis=y_subplot)
 
-    @singlekwargdispatchmethod
+    @singlekwargdispatch
     def set_subplot(self, subplot: Subplot | None = None, row: int | None = None, col: int | None = None):
         raise ValueError(f"{type(subplot)} is an invalid type for set_subplot")
 
@@ -632,7 +633,7 @@ class BasePlot(BaseObject):
             if self._color_sequence is not None:
                 self.set_trace_color(new_trace, next(self._color_cycle))
 
-    @singlekwargdispatchmethod("traces")
+    @singlekwargdispatch("traces")
     def add_traces(self, traces, *args: BaseTraceType, group: str | Iterable[str] | None = None) -> None:
         raise ValueError(f"{type(traces)} is an invalid type for add_trace")
 
@@ -666,7 +667,7 @@ class BasePlot(BaseObject):
             trace.update(dict1=dict1, overwrite=overwrite, **kwargs)
 
     # Trace/Legend
-    @singlekwargdispatchmethod("plots")
+    @singlekwargdispatch("plots")
     def group_same_legend_items(self, plots: "BasePlot", *args: "BasePlot") -> None:
         if not isinstance(plots, BasePlot):
             raise ValueError(f"{type(plots)} is an invalid type for group_same_legend")
