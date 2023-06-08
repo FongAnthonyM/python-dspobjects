@@ -1,107 +1,102 @@
-========
-Overview
-========
-
-.. start-badges
-
-.. list-table::
-    :stub-columns: 1
-
-    * - docs
-      - |docs|
-    * - tests
-      - | |travis| |appveyor| |requires|
-        | |codecov|
-    * - package
-      - | |version| |wheel| |supported-versions| |supported-implementations|
-        | |commits-since|
-.. |docs| image:: https://readthedocs.org/projects/python-dspobjects/badge/?style=flat
-    :target: https://python-dspobjects.readthedocs.io/
-    :alt: Documentation Status
-
-.. |travis| image:: https://api.travis-ci.com/fonganthonym/python-dspobjects.svg?branch=master
-    :alt: Travis-CI Build Status
-    :target: https://travis-ci.com/github/fonganthonym/python-dspobjects
-
-.. |appveyor| image:: https://ci.appveyor.com/api/projects/status/github/fonganthonym/python-dspobjects?branch=master&svg=true
-    :alt: AppVeyor Build Status
-    :target: https://ci.appveyor.com/project/fonganthonym/python-dspobjects
-
-.. |requires| image:: https://requires.io/github/fonganthonym/python-dspobjects/requirements.svg?branch=master
-    :alt: Requirements Status
-    :target: https://requires.io/github/fonganthonym/python-dspobjects/requirements/?branch=master
-
-.. |codecov| image:: https://codecov.io/gh/fonganthonym/python-dspobjects/branch/master/graphs/badge.svg?branch=master
-    :alt: Coverage Status
-    :target: https://codecov.io/github/fonganthonym/python-dspobjects
-
-.. |version| image:: https://img.shields.io/pypi/v/dspobjects.svg
-    :alt: PyPI Package latest release
-    :target: https://pypi.org/project/dspobjects
-
-.. |wheel| image:: https://img.shields.io/pypi/wheel/dspobjects.svg
-    :alt: PyPI Wheel
-    :target: https://pypi.org/project/dspobjects
-
-.. |supported-versions| image:: https://img.shields.io/pypi/pyversions/dspobjects.svg
-    :alt: Supported versions
-    :target: https://pypi.org/project/dspobjects
-
-.. |supported-implementations| image:: https://img.shields.io/pypi/implementation/dspobjects.svg
-    :alt: Supported implementations
-    :target: https://pypi.org/project/dspobjects
-
-.. |commits-since| image:: https://img.shields.io/github/commits-since/fonganthonym/python-dspobjects/v0.1.0.svg
-    :alt: Commits since latest release
-    :target: https://github.com/fonganthonym/python-dspobjects/compare/v0.1.0...master
-
-
-
-.. end-badges
-
-Extra objects for handling and typing HDF5 files.
-
-* Free software: BSD 2-Clause License
-
-Installation
+dspobjects
 ============
 
-::
+|PyPI| |Status| |Python Version| |License|
 
-    pip install dspobjects
+|Read the Docs| |Tests| |Codecov|
 
-You can also install the in-development version with::
+|pre-commit| |Black|
 
-    pip install https://github.com/fonganthonym/python-dspobjects/archive/master.zip
+.. |PyPI| image:: https://img.shields.io/pypi/v/dspobjects.svg
+   :target: https://pypi.org/project/dspobjects/
+   :alt: PyPI
+.. |Status| image:: https://img.shields.io/pypi/status/dspobjects.svg
+   :target: https://pypi.org/project/dspobjects/
+   :alt: Status
+.. |Python Version| image:: https://img.shields.io/pypi/pyversions/dspobjects
+   :target: https://pypi.org/project/dspobjects
+   :alt: Python Version
+.. |License| image:: https://img.shields.io/pypi/l/dspobjects
+   :target: https://opensource.org/licenses/MIT
+   :alt: License
+.. |Read the Docs| image:: https://img.shields.io/readthedocs/python-dspobjects/latest.svg?label=Read%20the%20Docs
+   :target: https://python-dspobjects.readthedocs.io/
+   :alt: Read the documentation at https://python-dspobjects.readthedocs.io/
+.. |Tests| image:: https://github.com/fongant/python-dspobjects/workflows/Tests/badge.svg
+   :target: https://github.com/fongant/dspobjects/actions?workflow=Tests
+   :alt: Tests
+.. |Codecov| image:: https://codecov.io/gh/fongant/python-dspobjects/branch/main/graph/badge.svg
+   :target: https://codecov.io/gh/fongant/python-dspobjects
+   :alt: Codecov
+.. |pre-commit| image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white
+   :target: https://github.com/pre-commit/pre-commit
+   :alt: pre-commit
+.. |Black| image:: https://img.shields.io/badge/code%20style-black-000000.svg
+   :target: https://github.com/psf/black
+   :alt: Black
 
 
-Documentation
-=============
+Features
+--------
+
+* TODO
 
 
-https://python-dspobjects.readthedocs.io/
+Requirements
+------------
+
+* TODO
 
 
-Development
-===========
+Installation
+------------
 
-To run all the tests run::
+You can install *dspobjects* via pip_ from PyPI_:
 
-    tox
+.. code:: console
 
-Note, to combine the coverage data from all the tox environments run:
+   $ pip install dspobjects
 
-.. list-table::
-    :widths: 10 90
-    :stub-columns: 1
 
-    - - Windows
-      - ::
+Usage
+-----
 
-            set PYTEST_ADDOPTS=--cov-append
-            tox
+Please see the `Command-line Reference <Usage_>`_ for details.
 
-    - - Other
-      - ::
 
-            PYTEST_ADDOPTS=--cov-append tox
+Contributing
+------------
+
+Contributions are very welcome.
+To learn more, see the `Contributor Guide`_.
+
+
+License
+-------
+
+Distributed under the terms of the `MIT license`_,
+*dspobjects* is free and open source software.
+
+
+Issues
+------
+
+If you encounter any problems,
+please `file an issue`_ along with a detailed description.
+
+
+Credits
+-------
+
+This project was generated from `@cjolowicz`_'s `Hypermodern Python Cookiecutter`_ template.
+
+.. _@cjolowicz: https://github.com/cjolowicz
+.. _Cookiecutter: https://github.com/audreyr/cookiecutter
+.. _MIT license: https://opensource.org/licenses/MIT
+.. _PyPI: https://pypi.org/
+.. _Hypermodern Python Cookiecutter: https://github.com/cjolowicz/cookiecutter-hypermodern-python
+.. _file an issue: https://github.com/fongant/python-dspobjects/issues
+.. _pip: https://pip.pypa.io/
+.. github-only
+.. _Contributor Guide: CONTRIBUTING.rst
+.. _Usage: https://python-dspobjects.readthedocs.io/en/latest/usage.html

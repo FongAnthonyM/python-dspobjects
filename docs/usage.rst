@@ -1,7 +1,6 @@
-=====
 Usage
 =====
 
-To use dspobjects in a project::
-
-	import dspobjects
+.. click:: dspobjects.__main__:main
+   :prog: python-dspobjects
+   :nested: full
