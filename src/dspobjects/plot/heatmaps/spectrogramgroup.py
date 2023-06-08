@@ -1,4 +1,4 @@
-""" spectrogramgroup.py
+"""spectrogramgroup.py
 
 """
 # Package Header #
@@ -36,20 +36,22 @@ class SpectrogramGroup(PlotGroup):
     Args:
 
     """
+
     default_layout_settings: dict[str, Any] = PlotGroup.default_layout_settings | dict(
-        modebar_add=['zoom',
-                     'pan',
-                     'drawline',
-                     'drawopenpath',
-                     'drawclosedpath',
-                     'drawcircle',
-                     'drawrect',
-                     'eraseshape'
-                     ],
+        modebar_add=[
+            "zoom",
+            "pan",
+            "drawline",
+            "drawopenpath",
+            "drawclosedpath",
+            "drawcircle",
+            "drawrect",
+            "eraseshape",
+        ],
     )
     default_subplot_settings: dict[str, Any] = dict(rows=2, cols=1, vertical_spacing=0.01, row_heights=[0.9, 0.1])
     default_plots: Mapping[str, BasePlot | PlotGroup] = dict(spectrogram=SpectrogramPlot, timeseries=TimeSeriesPlot)
-    default_locations: dict[str, tuple[int, int]] = dict(spectrogram=(0,0), timeseries=(1,0))
+    default_locations: dict[str, tuple[int, int]] = dict(spectrogram=(0, 0), timeseries=(1, 0))
     default_plot_settings: dict[str, dict[str, Any]] = dict(
         timeseries=dict(label_index=False, label_axis=False, trace_settings=dict(showlegend=False))
     )

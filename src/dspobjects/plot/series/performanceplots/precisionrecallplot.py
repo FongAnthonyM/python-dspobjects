@@ -1,4 +1,4 @@
-""" precisionrecallplot.py
+"""precisionrecallplot.py
 
 """
 # Package Header #
@@ -35,6 +35,7 @@ class PrecisionRecallPlot(ThresholdPerformancePlot):
     Args:
 
     """
+
     default_title_settings: dict[str, Any] = dict(text="Precision Recall")
     default_xaxis_settings: dict[str, Any] = ThresholdPerformancePlot.default_xaxis_settings | dict(
         title="Recall",

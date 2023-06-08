@@ -1,4 +1,4 @@
-""" tracecontainer.py
+"""tracecontainer.py
 
 """
 # Package Header #
@@ -37,6 +37,7 @@ class TraceContainer(GroupedList):
     Args:
 
     """
+
     # Magic Methods #
     # Construction/Destruction
     def __init__(
@@ -107,7 +108,7 @@ class TraceContainer(GroupedList):
         col: int | None = None,
         secondary_y: bool | None = None,
         exclude_empty_subplots: bool = False,
-        group: str | None = None
+        group: str | None = None,
     ) -> BaseTraceType:
         self._figure.add_trace(
             trace=trace,
@@ -129,7 +130,7 @@ class TraceContainer(GroupedList):
         col: int | None = None,
         secondary_y: bool | None = None,
         exclude_empty_subplots: bool = False,
-        group: str | None = None
+        group: str | None = None,
     ) -> tuple[BaseTraceType]:
         self._figure.add_traces(
             data=data,

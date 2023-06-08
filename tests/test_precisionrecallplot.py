@@ -37,6 +37,7 @@ def tmp_dir(tmpdir):
 # Classes #
 class ClassTest(abc.ABC):
     """Default class tests that all classes should pass."""
+
     class_ = None
     timeit_runs = 100000
     speed_tolerance = 200
@@ -45,14 +46,13 @@ class ClassTest(abc.ABC):
         pass
 
 
-class TestPrecisionRecallPlot():
-
+class TestPrecisionRecallPlot:
     def generate_data(self, samples=1024, channels=10):
         # Create Signal
         rng = np.random.default_rng()
         amp = 1
         noise_power = 0.0001
-        carrier = 1 - amp / np.log(np.arange(1, samples+1)*np.e)
+        carrier = 1 - amp / np.log(np.arange(1, samples + 1) * np.e)
         carrier = np.flip(carrier)
         y = np.repeat(carrier[:, None], channels, axis=1)
         noise = rng.normal(scale=np.sqrt(noise_power), size=(samples, channels))
@@ -63,7 +63,10 @@ class TestPrecisionRecallPlot():
 
     def test_precisionrecall_figure(self):
         x, y = self.generate_data()
-        plot1 = PrecisionRecallPlot(x=x, y=y,)
+        plot1 = PrecisionRecallPlot(
+            x=x,
+            y=y,
+        )
         plot1._figure.show()
 
     def test_precisionrecall_subplot(self):
@@ -77,4 +80,3 @@ class TestPrecisionRecallPlot():
         plot1.update_title(text="Test Name")
         # plot2 = TimeSeriesPlot(subplot=fig.subplots[0][1], y=data, sample_rate=1024.0)
         fig.show()
-

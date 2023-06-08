@@ -1,4 +1,4 @@
-""" timeseriesplot.py
+"""timeseriesplot.py
 
 """
 # Package Header #
@@ -38,6 +38,7 @@ class TimeSeriesPlot(StackedSeriesPlot):
     Args:
 
     """
+
     default_x_unit: str | None = "s"
     default_y_unit: str | None = "mV"
 

@@ -1,4 +1,4 @@
-""" plotgroup.py
+"""plotgroup.py
 
 """
 # Package Header #
@@ -45,13 +45,9 @@ class PlotGroup(BaseDict):
     Args:
 
     """
+
     default_layout_settings: dict[str, Any] = dict(
-        title=dict(
-            font=dict(size=30),
-            y=1.0,
-            x=0.5,
-            xanchor='center',
-            yanchor='top'),
+        title=dict(font=dict(size=30), y=1.0, x=0.5, xanchor="center", yanchor="top"),
         margin=dict(t=50, b=50),
     )
     default_subplot_settings: dict[str, Any] = {}
@@ -152,7 +148,7 @@ class PlotGroup(BaseDict):
         else:
             self.group_same_lengend_items(plots=self.default_legend_group)
 
-    def get_subplots(self) -> dict[str: Subplot | dict]:
+    def get_subplots(self) -> dict[str : Subplot | dict]:
         subplots = {}
         for name, plot in self.data.items():
             if isinstance(plot, BasePlot):
@@ -206,15 +202,15 @@ class PlotGroup(BaseDict):
     @singlekwargdispatch("key")
     def get_plot(self, key: Iterable[str] | str) -> BasePlot:
         raise ValueError(f"{type(key)} is an invalid type for get_plot")
-    
+
     @get_plot.register(Iterable)
     def _get_plot(self, key: Iterable[str]) -> BasePlot:
         plot = self
         for k in key:
             plot = plot[k]
-            
+
         return plot
-    
+
     @get_plot.register
     def _get_plot(self, key: str) -> BasePlot:
         return self[key]
@@ -232,19 +228,19 @@ class PlotGroup(BaseDict):
                 other = other.xaxis
 
             target.set_xaxis(other)
-    
+
     def assign_yaxes(self, axes: YAssignments) -> None:
         for target, other in axes:
             if not isinstance(target, BasePlot):
                 target = self.get_plot(key=target)
-                
+
             if isinstance(other, go.layout.YAxis):
                 pass
             elif isinstance(other, (str | Iterable)):
                 other = self.get_plot(key=other).yaxis
             elif isinstance(other, BasePlot):
                 other = other.yaxis
-                
+
             target.set_yaxis(other)
 
     def group_same_lengend_items(self, plots: Iterable[Iterable[PlotOrKey]]) -> None:
@@ -259,4 +255,3 @@ class PlotGroup(BaseDict):
         all_plots = iter(self.get_all_plots())
         first_plot = next(all_plots)
         first_plot.group_same_legend_items(plots=all_plots)
-

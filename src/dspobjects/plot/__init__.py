@@ -1,4 +1,4 @@
-""" __init__.py
+"""__init__.py
 Functions and classes for plotting data.
 """
 # Package Header #

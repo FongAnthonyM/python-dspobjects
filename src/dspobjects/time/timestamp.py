@@ -1,4 +1,4 @@
-""" timestamp.py
+"""timestamp.py
 Extends the pandas Timestamp class.
 """
 # Package Header #
@@ -32,6 +32,7 @@ NANO_SCALE = np.uint64(10**9)
 # Classes #
 class Timestamp(pd.Timestamp):
     """Extends the pandas Timestamp class."""
+
     _UNIX_EPOCH = pd.Timestamp(1970, 1, 1)
     UNIX_EPOCH = pd.Timestamp(1970, 1, 1).replace(tzinfo=timezone.utc)
 

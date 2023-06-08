@@ -37,6 +37,7 @@ def tmp_dir(tmpdir):
 # Classes #
 class ClassTest(abc.ABC):
     """Default class tests that all classes should pass."""
+
     class_ = None
     timeit_runs = 100000
     speed_tolerance = 200
@@ -45,8 +46,7 @@ class ClassTest(abc.ABC):
         pass
 
 
-class TestClassifierPerformanceGroup():
-
+class TestClassifierPerformanceGroup:
     def generate_data(self, samples=10240, channels=10):
         # Create Signal
         rng = np.random.default_rng()

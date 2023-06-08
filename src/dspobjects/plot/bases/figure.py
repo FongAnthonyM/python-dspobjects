@@ -1,4 +1,4 @@
-""" _figure.py
+"""_figure.py
 
 """
 # Package Header #
@@ -39,6 +39,7 @@ class Figure(go.Figure):
         figure: A plotly figure to convert to a this new object.
         **kwargs: Other keyword arguments used to construct a plotly figure.
     """
+
     # Magic Methods #
     # Construction/Destruction
     def __init__(self, data=None, layout=None, frames=None, skip_invalid=False, figure=None, **kwargs) -> None:
@@ -88,7 +89,7 @@ class Figure(go.Figure):
         """
         # Ensure there are titles for annotations
         if "subplot_titles" not in make_subplots_args:
-            make_subplots_args["subplot_titles"] = [f" " for i in range(rows*cols)]
+            make_subplots_args["subplot_titles"] = [f" " for i in range(rows * cols)]
 
         super().set_subplots(rows=rows, cols=cols, **make_subplots_args)
 
@@ -97,7 +98,7 @@ class Figure(go.Figure):
         for row in range(rows):
             for col in range(cols):
                 title = self.layout.annotations[(row * cols) + col]
-                self._subplots[row][col] = Subplot(figure=self, row=row+1, col=col+1, title=title)
+                self._subplots[row][col] = Subplot(figure=self, row=row + 1, col=col + 1, title=title)
 
         return self
 

@@ -1,4 +1,4 @@
-""" seriesplot.py
+"""seriesplot.py
 
 """
 # Package Header #
@@ -39,19 +39,21 @@ class SeriesPlot(BasePlot):
     Args:
 
     """
+
     default_layout_settings: dict[str, Any] = BasePlot.default_layout_settings | dict(
         dragmode="zoom",
         template="plotly_white",
         margin=dict(t=50, b=50),
-        modebar_add=['zoom',
-                     'pan',
-                     'drawline',
-                     'drawopenpath',
-                     'drawclosedpath',
-                     'drawcircle',
-                     'drawrect',
-                     'eraseshape'
-                     ],
+        modebar_add=[
+            "zoom",
+            "pan",
+            "drawline",
+            "drawopenpath",
+            "drawclosedpath",
+            "drawcircle",
+            "drawrect",
+            "eraseshape",
+        ],
     )
     default_xaxis_settings: dict[str, Any] = {}
     default_yaxis_settings: dict[str, Any] = {}
@@ -247,7 +249,7 @@ class SeriesPlot(BasePlot):
 
         # Create New TraceContainer
         default_trace = go.Scattergl()
-        self.add_traces((default_trace,)*n_additions, group="data")
+        self.add_traces((default_trace,) * n_additions, group="data")
 
         # Generate Labels
         labels = self.generate_labels(n_labels=n_channels)

@@ -1,4 +1,4 @@
-""" __init__.py
+"""__init__.py
 Classes and tools for handling timing.
 """
 # Package Header #

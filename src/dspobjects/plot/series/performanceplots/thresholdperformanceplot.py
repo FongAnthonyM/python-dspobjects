@@ -1,4 +1,4 @@
-""" thresholdperformanceplot.py
+"""thresholdperformanceplot.py
 
 """
 # Package Header #
@@ -40,9 +40,8 @@ class ThresholdPerformancePlot(ZeroOneDomainPlot):
     Args:
 
     """
-    default_hovertemplate: str | None = ("%{y:.4f} %{_y_unit}<br>" +
-                                         "%{x:.4f} %{_x_unit}<br>" +
-                                         "Threshold: %{text}")
+
+    default_hovertemplate: str | None = "%{y:.4f} %{_y_unit}<br>" + "%{x:.4f} %{_x_unit}<br>" + "Threshold: %{text}"
 
     # Magic Methods #
     # Construction/Destruction

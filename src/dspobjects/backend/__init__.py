@@ -1,4 +1,4 @@
-""" __init__.py
+"""__init__.py
 Objects for digital signal data processing.
 """
 # Package Header #

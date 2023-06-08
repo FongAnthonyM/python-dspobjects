@@ -1,4 +1,4 @@
-""" stackedseriesplot.py
+"""stackedseriesplot.py
 
 """
 # Package Header #
@@ -36,6 +36,7 @@ class StackedSeriesPlot(SeriesPlot):
     Args:
 
     """
+
     default_layout_settings: dict[str, Any] = SeriesPlot.default_layout_settings | dict(
         legend=dict(traceorder="reversed"),
     )
@@ -44,13 +45,7 @@ class StackedSeriesPlot(SeriesPlot):
         spikemode="across",
         autorange=True,
         fixedrange=True,
-        rangeslider=dict(
-            visible=True,
-            autorange=False,
-            thickness=0.04,
-            borderwidth=1,
-            yaxis=dict(rangemode="auto")
-        ),
+        rangeslider=dict(visible=True, autorange=False, thickness=0.04, borderwidth=1, yaxis=dict(rangemode="auto")),
     )
     default_yaxis_settings: dict[str, Any] = dict(
         showgrid=False,
@@ -61,28 +56,27 @@ class StackedSeriesPlot(SeriesPlot):
         type="linear",
         zeroline=False,
     )
-    default_hovertemplate: str | None = ("%{text} %{_y_unit}<br>" +
-                                         "%{x:.4f} %{_x_unit}")
+    default_hovertemplate: str | None = "%{text} %{_y_unit}<br>" + "%{x:.4f} %{_x_unit}"
 
     # Magic Methods #
     # Construction/Destruction
     def __init__(
-            self,
-            figure: Figure | None = None,
-            subplot: Subplot | None = None,
-            x: np.ndarray | None = None,
-            y: np.ndarray | None = None,
-            labels: Iterable[str] | None = None,
-            label_axis: bool = True,
-            label_index: bool = True,
-            tick_index_only: bool = False,
-            axis: int = 0,
-            c_axis: int = 1,
-            t_offset: float = 5.0,
-            z_score: bool = True,
-            build: bool = True,
-            init: bool = True,
-            **kwargs: Any,
+        self,
+        figure: Figure | None = None,
+        subplot: Subplot | None = None,
+        x: np.ndarray | None = None,
+        y: np.ndarray | None = None,
+        labels: Iterable[str] | None = None,
+        label_axis: bool = True,
+        label_index: bool = True,
+        tick_index_only: bool = False,
+        axis: int = 0,
+        c_axis: int = 1,
+        t_offset: float = 5.0,
+        z_score: bool = True,
+        build: bool = True,
+        init: bool = True,
+        **kwargs: Any,
     ) -> None:
         # Parent Attributes #
         super().__init__(init=False)

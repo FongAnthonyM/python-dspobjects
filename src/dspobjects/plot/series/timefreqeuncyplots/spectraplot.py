@@ -1,4 +1,4 @@
-""" spectraplot.py
+"""spectraplot.py
 
 """
 # Package Header #
@@ -32,4 +32,5 @@ class SpectraPlot(StackedSeriesPlot):
     Args:
 
     """
+
     default_x_unit: str | None = "Hz"

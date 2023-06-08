@@ -1,4 +1,4 @@
-""" rocpercisionrecallgroup.py
+"""rocpercisionrecallgroup.py
 
 """
 # Package Header #
@@ -36,19 +36,21 @@ class ROCPrecisionRecallGroup(PlotGroup):
     Args:
 
     """
+
     default_layout_settings: dict[str, Any] = PlotGroup.default_layout_settings | dict(
         dragmode="zoom",
         legend=dict(traceorder="reversed"),
         template="plotly_white",
-        modebar_add=['zoom',
-                     'pan',
-                     'drawline',
-                     'drawopenpath',
-                     'drawclosedpath',
-                     'drawcircle',
-                     'drawrect',
-                     'eraseshape'
-                     ],
+        modebar_add=[
+            "zoom",
+            "pan",
+            "drawline",
+            "drawopenpath",
+            "drawclosedpath",
+            "drawcircle",
+            "drawrect",
+            "eraseshape",
+        ],
     )
     default_subplot_settings: dict[str, Any] = dict(rows=1, cols=2, horizontal_spacing=0.05)
     default_plots: Mapping[str, BasePlot | PlotGroup] = dict(roc=ROCPlot, precisionrecall=PrecisionRecallPlot)

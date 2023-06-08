@@ -1,4 +1,4 @@
-""" heatmapplot.py
+"""heatmapplot.py
 
 """
 # Package Header #
@@ -37,9 +37,8 @@ class HeatmapPlot(BasePlot):
     Args:
 
     """
-    default_hovertemplate: str | None = ("%{z:.4f} %{_z_unit}<br>" +
-                                         "%{y:.4f} %{_y_unit}<br>" +
-                                         "%{x:.4f} %{_x_unit}")
+
+    default_hovertemplate: str | None = "%{z:.4f} %{_z_unit}<br>" + "%{y:.4f} %{_y_unit}<br>" + "%{x:.4f} %{_x_unit}"
     default_color_sequence: list | None = None
 
     # Instance Methods #
@@ -91,11 +90,13 @@ class HeatmapPlot(BasePlot):
         trace_iter = iter(self._traces["data"])
         trace = next(trace_iter)
 
-        trace.update(dict(
-            x=np.squeeze(self.generate_x(lengths=[self.z.shape[0]])),
-            y=np.squeeze(self.generate_y(lengths=[self.z.shape[1]])),
-            z=self.z,
-        ))
+        trace.update(
+            dict(
+                x=np.squeeze(self.generate_x(lengths=[self.z.shape[0]])),
+                y=np.squeeze(self.generate_y(lengths=[self.z.shape[1]])),
+                z=self.z,
+            )
+        )
 
         # Todo: Figure out how to add text
 

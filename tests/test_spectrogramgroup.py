@@ -38,6 +38,7 @@ def tmp_dir(tmpdir):
 # Classes #
 class ClassTest(abc.ABC):
     """Default class tests that all classes should pass."""
+
     class_ = None
     timeit_runs = 100000
     speed_tolerance = 200
@@ -46,8 +47,7 @@ class ClassTest(abc.ABC):
         pass
 
 
-class TestSpectrogramGroup():
-
+class TestSpectrogramGroup:
     def generate_data(self):
         # Create Signal
         rng = np.random.default_rng()
@@ -83,4 +83,3 @@ class TestSpectrogramGroup():
         plot1.update_title(text="Test Name")
         # plot2 = TimeSeriesPlot(subplot=fig.subplots[0][1], y=data, sample_rate=1024.0)
         fig.show()
-

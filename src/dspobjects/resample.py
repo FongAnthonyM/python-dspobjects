@@ -1,4 +1,4 @@
-""" resample.py
+"""resample.py
 
 """
 # Package Header #
@@ -33,16 +33,18 @@ def construct_low_pass_filter(fs, corner_freq, stop_tol=10):
     stop_freq = (1 + stop_tol / 100) * corner_freq
 
     # Get butterworth filter parameters
-    buttord_params = {'wp': corner_freq,  # Passband
-                      'ws': stop_freq,  # Stopband
-                      'gpass': 3,  # 3dB corner at pass band
-                      'gstop': 60,  # 60dB min. attenuation at stop band
-                      'analog': False,  # Digital filter
-                      'fs': fs}
+    buttord_params = {
+        "wp": corner_freq,  # Passband
+        "ws": stop_freq,  # Stopband
+        "gpass": 3,  # 3dB corner at pass band
+        "gstop": 60,  # 60dB min. attenuation at stop band
+        "analog": False,  # Digital filter
+        "fs": fs,
+    }
     ford, wn = buttord(**buttord_params)
 
     # Design the filter using second-order sections to ensure better stability
-    return butter(ford, wn, btype='lowpass', output='sos', fs=fs)
+    return butter(ford, wn, btype="lowpass", output="sos", fs=fs)
 
 
 def construct_high_pass_filter(fs, corner_freq, stop_tol=10):
@@ -51,16 +53,18 @@ def construct_high_pass_filter(fs, corner_freq, stop_tol=10):
     stop_freq = (1 + stop_tol / 100) * corner_freq
 
     # Get butterworth filter parameters
-    buttord_params = {'wp': corner_freq,  # Passband
-                      'ws': stop_freq,  # Stopband
-                      'gpass': 3,  # 3dB corner at pass band
-                      'gstop': 60,  # 60dB min. attenuation at stop band
-                      'analog': False,  # Digital filter
-                      'fs': fs}
+    buttord_params = {
+        "wp": corner_freq,  # Passband
+        "ws": stop_freq,  # Stopband
+        "gpass": 3,  # 3dB corner at pass band
+        "gstop": 60,  # 60dB min. attenuation at stop band
+        "analog": False,  # Digital filter
+        "fs": fs,
+    }
     ford, wn = buttord(**buttord_params)
 
     # Design the filter using second-order sections to ensure better stability
-    return butter(ford, wn, btype='high', output='sos', fs=fs)
+    return butter(ford, wn, btype="high", output="sos", fs=fs)
 
 
 def remove_dc_drift(data=None, fs=None, corner_freq=0.5, axis=0, copy_=True):
@@ -163,8 +167,16 @@ class Resample(BaseObject):
         self.true_fs = self.high_fs / self.q
         self.true_nyq = self.true_fs // 2
 
-    def construct_interpolator(self, data=None, interp_type="linear", axis=0, copy_=True, bounds_error=None,
-                               fill_value=np.nan, assume_sorted=False):
+    def construct_interpolator(
+        self,
+        data=None,
+        interp_type="linear",
+        axis=0,
+        copy_=True,
+        bounds_error=None,
+        fill_value=np.nan,
+        assume_sorted=False,
+    ):
         if data is not None:
             self.data = data
 
@@ -174,7 +186,9 @@ class Resample(BaseObject):
         samples = self.data.shape[0]
         x = np.arange(0, samples)
         y = self.data
-        self.interpolator = interpolate.interp1d(x, y, interp_type, axis, copy_, bounds_error, fill_value, assume_sorted)
+        self.interpolator = interpolate.interp1d(
+            x, y, interp_type, axis, copy_, bounds_error, fill_value, assume_sorted
+        )
 
     def construct_aa_filters(self, new_fs=None, old_fs=None, aa_corner=None):
         if new_fs is not None or old_fs is not None or self.true_nyq is None:
@@ -202,7 +216,7 @@ class Resample(BaseObject):
         if self.interpolator is None or data is not None:
             self.construct_interpolator(data)
 
-        return self.interpolator(np.linspace(0, samples-1, self.p*samples))
+        return self.interpolator(np.linspace(0, samples - 1, self.p * samples))
 
     def filter(self, data, copy_=True):
         if copy_:

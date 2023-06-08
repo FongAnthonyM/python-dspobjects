@@ -1,4 +1,4 @@
-""" dataobjects.py
+"""dataobjects.py
 
 """
 # Package Header #
@@ -27,12 +27,14 @@ import numpy as np
 # Index #
 class IndexValue(NamedTuple):
     """A named tuple for returning an index with a value."""
+
     index: int | None
     value: Any
 
 
 class IndexDateTime(NamedTuple):
     """A named tuple for returning an index with a datetime."""
+
     index: int | None
     datetime: datetime.datetime | None
 
@@ -40,6 +42,7 @@ class IndexDateTime(NamedTuple):
 # Found Ranges #
 class FoundRange(NamedTuple):
     """A named tuple for returning a range with its start and end."""
+
     data: tuple[int | float] | np.ndarray | None
     start: int | None
     end: int | None
@@ -47,6 +50,7 @@ class FoundRange(NamedTuple):
 
 class FoundTimeRange(NamedTuple):
     """A name tuple for returning a range of times with its start and end."""
+
     data: tuple[datetime.datetime] | np.ndarray | None
     start: int | None
     end: int | None
@@ -54,6 +58,7 @@ class FoundTimeRange(NamedTuple):
 
 class FoundData(NamedTuple):
     """A named tuple for returning a found data."""
+
     data: np.ndarray | None
     index: int | None
     datetime: datetime.datetime | None
@@ -61,6 +66,7 @@ class FoundData(NamedTuple):
 
 class FoundDataRange(NamedTuple):
     """A named tuple for returning a found data range."""
+
     data: np.ndarray | None
     axis: np.ndarray | None
     start: int | float | None

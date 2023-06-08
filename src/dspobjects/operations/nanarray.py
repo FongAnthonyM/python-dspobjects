@@ -1,4 +1,4 @@
-""" nanarray.py
+"""nanarray.py
 A function that creates an array of NaNs.
 """
 # Package Header #

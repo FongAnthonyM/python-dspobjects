@@ -1,4 +1,4 @@
-""" _subplot.py
+"""_subplot.py
 
 """
 # Package Header #
@@ -13,7 +13,7 @@ __email__ = __email__
 
 # Imports #
 # Standard Libraries #
-from typing import  Any
+from typing import Any
 
 # Third-Party Packages #
 from baseobjects import BaseObject
@@ -34,6 +34,7 @@ class Subplot(BaseObject):
     Args:
 
     """
+
     # Magic Methods #
     # Construction/Destruction
     def __init__(

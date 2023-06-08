@@ -22,7 +22,10 @@ Changelog = "https://github.com/fongant/python-dspobjects/releases"
 python = "^3.10"
 click = "^8.0.3"
 baseobjects = "^1.9.0"
+numpy = "^1.24.3"
+openpyxl = "^3.1.2"
 pandas = "^1.4.1"
+plotly = "^5.15.0"
 tomli = "^2.0.1"
 
 [tool.poetry.dev-dependencies]

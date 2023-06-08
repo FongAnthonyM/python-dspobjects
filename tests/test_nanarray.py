@@ -37,6 +37,7 @@ def tmp_dir(tmpdir):
 # Classes #
 class ClassTest(abc.ABC):
     """Default class tests that all classes should pass."""
+
     class_ = None
     timeit_runs = 100000
     speed_tolerance = 200
@@ -46,7 +47,6 @@ class ClassTest(abc.ABC):
 
 
 class TestNanArray:
-
     def test_nan_array(self):
         a = nan_array(3, dtype="u8")
         assert a

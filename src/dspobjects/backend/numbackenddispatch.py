@@ -1,4 +1,4 @@
-""" numbackenddispatch.py
+"""numbackenddispatch.py
 
 """
 # Package Header #
@@ -22,6 +22,7 @@ from baseobjects import BaseDecorator
 from baseobjects.dataclasses import Parameters
 from baseobjects.typing import AnyCallable
 import numpy as np
+
 try:
     import tomllib
 except ModuleNotFoundError:
@@ -31,6 +32,7 @@ import warnings
 try:
     import cupy as cp
     import cupyx
+
     cp_array_types = (
         cp.ndarray,
         cupyx.scipy.sparse.spmatrix,
@@ -58,6 +60,7 @@ class NumBackendDispatch(BaseDecorator):
     Args:
 
     """
+
     config_path = pathlib.Path.cwd().joinpath("num_backend_dispatch.toml")
     class_backend: ModuleType = np
 
@@ -111,7 +114,7 @@ class NumBackendDispatch(BaseDecorator):
     @dispatch_method.setter
     def dispatch_method(self, value: AnyCallable | str) -> None:
         self.set_dispatch_method(value)
-    
+
     # Instance Methods #
     # Constructors/Destructors
     def construct(
@@ -245,7 +248,7 @@ class NumBackendDispatch(BaseDecorator):
             self._dispatch_method = getattr(self, method)
         else:
             raise TypeError(f"A {type(method)} cannot be used to set a dispatch method.")
-    
+
     def no_dispatch(self, *args: Any, **kwargs: Any) -> ModuleType:
         """This dispatch passes a default backend.
 

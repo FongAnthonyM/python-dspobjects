@@ -1,4 +1,4 @@
-""" rocplot.py
+"""rocplot.py
 
 """
 # Package Header #
@@ -35,6 +35,7 @@ class ROCPlot(ThresholdPerformancePlot):
     Args:
 
     """
+
     default_title_settings: dict[str, Any] = dict(text="ROC")
     default_xaxis_settings: dict[str, Any] = ThresholdPerformancePlot.default_xaxis_settings | dict(
         title="False Positive Rate",

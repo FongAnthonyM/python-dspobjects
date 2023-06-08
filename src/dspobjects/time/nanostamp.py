@@ -1,4 +1,4 @@
-""" nanostamp.py
+"""nanostamp.py
 Create a nanostamp based on input
 """
 # Package Header #
@@ -59,7 +59,7 @@ def _nanostamp(value: pd.Timestamp, is_nano: bool = False) -> np.uint64:
     Args:
         value: The value create the nanostamp from.
         is_nano: Determines if the input is in nanoseconds.
-    
+
     Returns:
         A nanostamp.
     """
@@ -97,7 +97,7 @@ def _nanostamp(value: np.ndarray, is_nano: bool = False) -> np.ndarray:
     """
     if not is_nano:
         value = value * NANO_SCALE
-    
+
     return value.astype(np.uint64)
 
 

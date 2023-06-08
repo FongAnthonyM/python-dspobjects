@@ -38,6 +38,7 @@ def tmp_dir(tmpdir):
 # Classes #
 class ClassTest(abc.ABC):
     """Default class tests that all classes should pass."""
+
     class_ = None
     timeit_runs = 100000
     speed_tolerance = 200
@@ -46,8 +47,7 @@ class ClassTest(abc.ABC):
         pass
 
 
-class TestSpectrogramsPlot():
-
+class TestSpectrogramsPlot:
     def generate_data(self, samples=10240, channels=10):
         # Create Signal
         rng = np.random.default_rng()
@@ -69,7 +69,7 @@ class TestSpectrogramsPlot():
         f, t, Sxx = self.generate_data()
         plot1 = SpectrogramPlot(x=t, y=f, z=Sxx)
         plot1.update_title(text="Test Name")
-        plot1._figure.show(aspect='auto')
+        plot1._figure.show(aspect="auto")
 
     def test_spectrogramplot_subplot(self):
         f, t, Sxx = self.generate_data()
@@ -80,5 +80,3 @@ class TestSpectrogramsPlot():
         # plot2 = SpectrogramPlot(subplot=fig.subplots[1][0], x=t, y=f, z=Sxx)
         plot1.update_title(text="Test Name")
         fig.show()
-
-

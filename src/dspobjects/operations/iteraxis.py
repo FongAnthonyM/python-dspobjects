@@ -1,4 +1,4 @@
-""" iteraxis.py
+"""iteraxis.py
 A function that iterates over a specific dimension of a ndarray.
 """
 # Package Header #

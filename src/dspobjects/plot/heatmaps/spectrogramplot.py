@@ -1,4 +1,4 @@
-""" spectrogramplot.py
+"""spectrogramplot.py
 
 """
 # Package Header #
@@ -39,6 +39,7 @@ class SpectrogramPlot(HeatmapPlot):
     Args:
 
     """
+
     default_yaxis_settings: dict[str, Any] = dict(
         fixedrange=False,
     )
@@ -125,4 +126,3 @@ class SpectrogramPlot(HeatmapPlot):
             return self.x * len(lengths)
         else:
             return self.x
-

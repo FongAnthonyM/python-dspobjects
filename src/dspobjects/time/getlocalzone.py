@@ -1,4 +1,4 @@
-""" getlocalzone.py
+"""getlocalzone.py
 Gets the local time zone.
 """
 # Package Header #

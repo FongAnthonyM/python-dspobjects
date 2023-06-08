@@ -1,4 +1,4 @@
-""" baseplot.py
+"""baseplot.py
 A base plot object which wraps arround the plotly API.
 """
 # Package Header #
@@ -99,13 +99,9 @@ class BasePlot(BaseObject):
     Args:
 
     """
+
     default_layout_settings: dict[str, Any] = dict(
-        title=dict(
-            font=dict(size=30),
-            y=1.0,
-            x=0.5,
-            xanchor='center',
-            yanchor='top'),
+        title=dict(font=dict(size=30), y=1.0, x=0.5, xanchor="center", yanchor="top"),
     )
     default_title_settings: dict[str, Any] = dict()
     default_xaxis_settings: dict[str, Any] = dict()
@@ -425,9 +421,15 @@ class BasePlot(BaseObject):
             **kwargs,
         )
 
-        title_settings = union_recursive(self.default_title_settings, title) if title is not None else self.default_title_settings
-        xaxis_settings = union_recursive(self.default_xaxis_settings, xaxis) if xaxis is not None else self.default_xaxis_settings
-        yaxis_settings = union_recursive(self.default_yaxis_settings, yaxis) if yaxis is not None else self.default_yaxis_settings
+        title_settings = (
+            union_recursive(self.default_title_settings, title) if title is not None else self.default_title_settings
+        )
+        xaxis_settings = (
+            union_recursive(self.default_xaxis_settings, xaxis) if xaxis is not None else self.default_xaxis_settings
+        )
+        yaxis_settings = (
+            union_recursive(self.default_yaxis_settings, yaxis) if yaxis is not None else self.default_yaxis_settings
+        )
 
         self.update_title(title_settings)
         self.update_xaxis(xaxis_settings)
@@ -532,7 +534,10 @@ class BasePlot(BaseObject):
             self._static_trace_settings.update(static_trace_settings)
 
     def build(self, *args: Any, **kwargs: Any) -> None:
-        self._update_attributes(*args, **kwargs,)
+        self._update_attributes(
+            *args,
+            **kwargs,
+        )
         self.build_static_traces()
 
     def build_static_traces(self, static_traces: dict[str, BaseTraceType] | None = None, **kwargs: Any) -> None:
@@ -566,13 +571,13 @@ class BasePlot(BaseObject):
 
     def set_xaxis(self, xaxis: go.layout.XAxis) -> None:
         self._xaxis = xaxis
-        axis_name = xaxis.plotly_name.replace("axis", '')
+        axis_name = xaxis.plotly_name.replace("axis", "")
         for trace in self._traces:
             trace.update(xaxis=axis_name)
 
     def set_yaxis(self, yaxis: go.layout.YAxis) -> None:
         self._yaxis = yaxis
-        axis_name = yaxis.plotly_name.replace("axis", '')
+        axis_name = yaxis.plotly_name.replace("axis", "")
         for trace in self._traces:
             trace.update(yaxis=axis_name)
 
@@ -595,11 +600,11 @@ class BasePlot(BaseObject):
             self._figure.layout.yaxis.update(dict1=dict1, overwrite=overwrite, **kwargs)
 
     def scaleanchor_x_to_y(self):
-        axis_name = self.yaxis.plotly_name.replace("axis", '')
+        axis_name = self.yaxis.plotly_name.replace("axis", "")
         self.update_xaxis(scaleanchor=axis_name)
 
     def scaleanchor_y_to_x(self):
-        axis_name = self.xaxis.plotly_name.replace("axis", '')
+        axis_name = self.xaxis.plotly_name.replace("axis", "")
         self.update_yaxis(scaleanchor=axis_name)
 
     # TraceContainer
@@ -617,10 +622,10 @@ class BasePlot(BaseObject):
         # Trace Settings
         trace_defaults = self._trace_settings.copy()
         if self._xaxis is not None:
-            trace_defaults["xaxis"] = self._xaxis.plotly_name.replace("axis", '')
+            trace_defaults["xaxis"] = self._xaxis.plotly_name.replace("axis", "")
 
         if self._yaxis is not None:
-            trace_defaults["yaxis"] = self._yaxis.plotly_name.replace("axis", '')
+            trace_defaults["yaxis"] = self._yaxis.plotly_name.replace("axis", "")
 
         for trace in traces:
             if self._subplot is not None:
@@ -779,10 +784,10 @@ class BasePlot(BaseObject):
         # Trace Settings
         trace_defaults = self._static_trace_settings.copy()
         if self._xaxis is not None:
-            trace_defaults["xaxis"] = self._xaxis.plotly_name.replace("axis", '')
+            trace_defaults["xaxis"] = self._xaxis.plotly_name.replace("axis", "")
 
         if self._yaxis is not None:
-            trace_defaults["yaxis"] = self._yaxis.plotly_name.replace("axis", '')
+            trace_defaults["yaxis"] = self._yaxis.plotly_name.replace("axis", "")
 
         trace_group = self._traces["static"].create_group(name)
         if self._subplot is not None:
@@ -795,10 +800,10 @@ class BasePlot(BaseObject):
         # Trace Settings
         trace_defaults = self._static_trace_settings.copy()
         if self._xaxis is not None:
-            trace_defaults["xaxis"] = self._xaxis.plotly_name.replace("axis", '')
+            trace_defaults["xaxis"] = self._xaxis.plotly_name.replace("axis", "")
 
         if self._yaxis is not None:
-            trace_defaults["yaxis"] = self._yaxis.plotly_name.replace("axis", '')
+            trace_defaults["yaxis"] = self._yaxis.plotly_name.replace("axis", "")
 
         for name, trace in dict_.items():
             trace_group = self._traces["static"].create_group(name)

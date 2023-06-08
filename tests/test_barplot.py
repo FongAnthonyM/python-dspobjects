@@ -37,6 +37,7 @@ def tmp_dir(tmpdir):
 # Classes #
 class ClassTest(abc.ABC):
     """Default class tests that all classes should pass."""
+
     class_ = None
     timeit_runs = 100000
     speed_tolerance = 200
@@ -45,8 +46,7 @@ class ClassTest(abc.ABC):
         pass
 
 
-class TestBarPlot():
-
+class TestBarPlot:
     def generate_data(self, samples=10, channels=1):
         counts = np.random.randint(1, 100, size=(samples, channels))
         return counts
@@ -55,7 +55,7 @@ class TestBarPlot():
         data = self.generate_data()
         fig = Figure()
         fig.set_subplots(1, 2)
-        plot1 = BarPlot(subplot=fig.subplots[0][0], y=data, orientation='v')
+        plot1 = BarPlot(subplot=fig.subplots[0][0], y=data, orientation="v")
         plot1.update_title(text="Test Name")
         fig.show()
 
@@ -63,7 +63,7 @@ class TestBarPlot():
         data = self.generate_data()
         fig = Figure()
         fig.set_subplots(1, 2)
-        plot1 = BarPlot(subplot=fig.subplots[0][0], x=data, orientation='h')
+        plot1 = BarPlot(subplot=fig.subplots[0][0], x=data, orientation="h")
         plot1.update_title(text="Test Name")
         fig.show()
 
@@ -71,7 +71,7 @@ class TestBarPlot():
         data = self.generate_data()
         fig = Figure()
         fig.set_subplots(1, 2)
-        plot1 = BarPlot(subplot=fig.subplots[0][0], y=data, orientation='v', separated=True)
+        plot1 = BarPlot(subplot=fig.subplots[0][0], y=data, orientation="v", separated=True)
         plot1.update_title(text="Test Name")
         fig.show()
 
@@ -79,6 +79,6 @@ class TestBarPlot():
         data = self.generate_data()
         fig = Figure()
         fig.set_subplots(1, 2)
-        plot1 = BarPlot(subplot=fig.subplots[0][0], x=data, orientation='h', separated=True)
+        plot1 = BarPlot(subplot=fig.subplots[0][0], x=data, orientation="h", separated=True)
         plot1.update_title(text="Test Name")
         fig.show()

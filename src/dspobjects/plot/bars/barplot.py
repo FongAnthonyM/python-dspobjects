@@ -1,4 +1,4 @@
-""" barplot.py
+"""barplot.py
 
 """
 # Package Header #
@@ -40,6 +40,7 @@ class BarPlot(BasePlot):
     Args:
 
     """
+
     # Magic Methods #
     # Construction/Destruction
     def __init__(
@@ -50,7 +51,7 @@ class BarPlot(BasePlot):
         y: np.ndarray | None = None,
         labels: list | None = None,
         names: list | None = None,
-        orientation: str = 'v',
+        orientation: str = "v",
         separated: bool = False,
         axis: int = 0,
         c_axis: int = 1,
@@ -64,7 +65,7 @@ class BarPlot(BasePlot):
 
         # New Attributes #
         self._separated_categories: bool = False
-        self._orientation: str = 'v'
+        self._orientation: str = "v"
         self._names: Iterable[str] | None = None
 
         # Object Construction #
@@ -116,7 +117,7 @@ class BarPlot(BasePlot):
             self._names = names
 
         if orientation is not None:
-            if orientation in {'v', 'h'}:
+            if orientation in {"v", "h"}:
                 self._orientation = orientation
             else:
                 raise ValueError(f"{orientation} is not a valid orientation. [v, h]")
@@ -160,8 +161,7 @@ class BarPlot(BasePlot):
             **kwargs,
         )
 
-        if (self._orientation == "v" and self.y is not None or
-            self._orientation == "h" and self.x is not None):
+        if self._orientation == "v" and self.y is not None or self._orientation == "h" and self.x is not None:
             # Apply Data
             self.update_plot()
 
@@ -171,7 +171,7 @@ class BarPlot(BasePlot):
             trace = self._traces[trace]
 
         trace.update(base=dict(color=color))
-    
+
     def x_iterator(self, lengths: Iterable[int] | None = None) -> Iterator:
         if self.x is None:
             return (np.arange(length) * self._trace_offset for length in lengths)
@@ -306,22 +306,22 @@ class BarPlot(BasePlot):
         )
 
         # Prepare Data to go in the correct orientation
-        if self._orientation == 'v':
+        if self._orientation == "v":
             data_iter = self.y_iterator([1])
             n_bars = [len(d_c) for d_c in self.y_iterator([1])]
             n_sets = len(n_bars)
             locations_iter = self.x_iterator(n_bars)
             locations = next(itertools.islice(self.x_iterator(n_bars), np.argmax(n_bars), None))
-            l_axis = 'x'
-            b_axis = 'y'
-        elif self._orientation == 'h':
+            l_axis = "x"
+            b_axis = "y"
+        elif self._orientation == "h":
             data_iter = self.x_iterator([1])
             n_bars = [len(d_c) for d_c in self.x_iterator([1])]
             n_sets = len(n_bars)
             locations_iter = self.y_iterator(n_bars)
             locations = next(itertools.islice(self.y_iterator(n_bars), np.argmax(n_bars), None))
-            l_axis = 'y'
-            b_axis = 'x'
+            l_axis = "y"
+            b_axis = "x"
         else:
             raise ValueError(f"{self._orientation} is not a valid orientation. [v, h]")
 
@@ -344,7 +344,7 @@ class BarPlot(BasePlot):
             ticktext=tick_labels,
         )
 
-        if self._orientation == 'v':
+        if self._orientation == "v":
             self.update_xaxis(tick_info)
         else:
             self.update_yaxis(tick_info)
