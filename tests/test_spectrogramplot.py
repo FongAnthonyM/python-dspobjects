@@ -69,6 +69,7 @@ class TestSpectrogramsPlot:
         f, t, Sxx = self.generate_data()
         plot1 = SpectrogramPlot(x=t, y=f, z=Sxx)
         plot1.update_title(text="Test Name")
+        plot1._figure.write_html("test_spectrogram.html")
         plot1._figure.show(aspect="auto")
 
     def test_spectrogramplot_subplot(self):

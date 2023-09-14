@@ -71,6 +71,7 @@ class TestSpectrogramGroup:
         sp_group = SpectrogramGroup()
         sp_group["spectrogram"].build(x=t, y=f, z=Sxx)
         sp_group["timeseries"].build(y=np.expand_dims(y, 1), sample_rate=10e3)
+        sp_group._figure.write_html("test_spectrogram_group.html")
         sp_group.figure.show()
 
     def test_spectrogramplot_subplot(self):

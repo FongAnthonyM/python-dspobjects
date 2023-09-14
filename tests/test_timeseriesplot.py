@@ -55,6 +55,7 @@ class TestTimeSeriesPlot:
         data = self.generate_data()
         plot1 = TimeSeriesPlot(y=data, sample_rate=1024.0)
         plot1.update_title(text="Test Name")
+        plot1._figure.write_html("test_time_series.html")
         plot1._figure.show()
 
     def test_timeseriesplot_subplot(self):
