@@ -26,7 +26,7 @@ from .getlocalzone import get_localzone
 
 
 # Definitions #
-NANO_SCALE = np.uint64(10**9)
+NANO_SCALE = np.uint64(1e9)
 
 
 # Classes #
