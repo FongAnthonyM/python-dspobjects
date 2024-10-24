@@ -13,7 +13,7 @@ __email__ = __email__
 
 # Imports #
 # Standard Libraries #
-from datetime import datetime, timezone, date, tzinfo
+from datetime import datetime, timezone, date, tzinfo, timedelta
 import time
 
 # Third-Party Packages #
@@ -30,7 +30,7 @@ from .timestamp import Timestamp, NANO_SCALE
 # Functions #
 @singlekwargdispatch("value")
 def nanostamp(
-    value: datetime | date | float | int | np.dtype | np.ndarray,
+    value: timedelta | datetime | date | float | int | np.dtype | np.ndarray,
     tz: tzinfo | None = None,
     is_nano: bool = False,
 ) -> np.uint64 | np.ndarray:
@@ -62,6 +62,21 @@ def _nanostamp_uint64(value: np.uint64, tz: tzinfo | None = None, is_nano: bool 
 
 
 @nanostamp.register
+def _nanostamp_pd_timedelta(value: pd.Timedelta, tz: tzinfo | None = None, is_nano: bool = False) -> np.uint64:
+    """Creates a nanostamp from the input.
+
+    Args:
+        value: The value create the nanostamp from.
+        tz: The timezone of given value.
+        is_nano: Determines if the input is in nanoseconds.
+
+    Returns:
+        A nanostamp.
+    """
+    return np.uint64(value.total_seconds() * NANO_SCALE + value.nanoseconds)
+
+
+@nanostamp.register
 def _nanostamp_pd_timestamp(value: pd.Timestamp, tz: tzinfo | None = None, is_nano: bool = False) -> np.uint64:
     """Creates a nanostamp from the input.
 
@@ -83,6 +98,21 @@ def _nanostamp_pd_timestamp(value: pd.Timestamp, tz: tzinfo | None = None, is_na
 
 
 @nanostamp.register
+def _nanostamp_timedelta(value: timedelta, tz: tzinfo | None = None, is_nano: bool = False) -> np.uint64:
+    """Creates a nanostamp from the input.
+
+    Args:
+        value: The value create the nanostamp from.
+        tz: The timezone of given value.
+        is_nano: Determines if the input is in nanoseconds.
+
+    Returns:
+        A nanostamp.
+    """
+    return np.uint64(value.total_seconds() * NANO_SCALE)
+
+
+@nanostamp.register
 def _nanostamp_datetime(value: datetime, tz: tzinfo | None = None, is_nano: bool = False) -> np.uint64:
     """Creates a nanostamp from the input.
 
@@ -98,6 +128,7 @@ def _nanostamp_datetime(value: datetime, tz: tzinfo | None = None, is_nano: bool
         value = value.replace(tzinfo=tz)
     return np.uint64(value.timestamp() * NANO_SCALE)
 
+
 @nanostamp.register
 def _nanostamp_date(value: date, tz: tzinfo | None = None, is_nano: bool = False) -> np.uint64:
     """Creates a nanostamp from the input.
@@ -111,6 +142,7 @@ def _nanostamp_date(value: date, tz: tzinfo | None = None, is_nano: bool = False
         A nanostamp.
     """
     return _nanostamp_pd_timestamp(Timestamp(value, tz=timezone.utc if tz is None else tz), is_nano=is_nano)
+
 
 @nanostamp.register
 def _nanostamp_array(value: np.ndarray, tz: tzinfo | None = None, is_nano: bool = False) -> np.ndarray:
@@ -146,7 +178,4 @@ def _nanostamp(value: float | int | np.dtype, is_nano: bool = False) -> np.uint6
     Returns:
         A nanostamp.
     """
-    if is_nano:
-        return np.uint64(value)
-    else:
-        return np.uint64(value * NANO_SCALE)
+    return np.uint64(value if is_nano else value * NANO_SCALE)
