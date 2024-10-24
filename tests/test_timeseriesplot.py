@@ -53,17 +53,19 @@ class TestTimeSeriesPlot:
 
     def test_timeseriesplot_figure(self):
         data = self.generate_data()
-        plot1 = TimeSeriesPlot(y=data, sample_rate=1024.0)
+        fig = Figure()
+        plot1 = TimeSeriesPlot(figure=fig, y=data, sample_rate=1024.0, t_offset=0.0)
+        plot1.labels
         plot1.update_title(text="Test Name")
-        plot1._figure.write_html("test_time_series.html")
-        plot1._figure.show()
+        fig.write_html("test_time_series.html")
+        fig.show()
 
     def test_timeseriesplot_subplot(self):
         data = self.generate_data()
         fig = Figure()
         fig.update_layout(title="Figure Name")
         fig.update_layout(TimeSeriesPlot.default_layout_settings)
-        fig.set_subplots(1, 3, horizontal_spacing=0.05)
+        fig.set_subplots(1, 3, horizontal_spacing=0.05, specs=[[{'type': 'xy'}, {'type': "xy"}, {}]],)
         plot1 = TimeSeriesPlot(subplot=fig.subplots[0][1], y=data, sample_rate=1024.0)
         plot2 = TimeSeriesPlot(subplot=fig.subplots[0][0], y=data, sample_rate=1024.0)
         plot1.update_title(text="Test Name")
